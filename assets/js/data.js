@@ -4,8 +4,8 @@
  */
 (function (global) {
   var DEFAULTS = {
-    SUPABASE_URL: 'https://ykmtewsfkgduvkmguasv.supabase.co',
-    SUPABASE_ANON_KEY: 'sb_publishable_MLpWccgmEUcRBiiavhtalg_O1Zer_8s',
+    SUPABASE_URL: 'https://ppehttbtrlavnrytoweu.supabase.co',
+    SUPABASE_ANON_KEY: 'sb_publishable_9uAFLjS4AaElHus4hiUuQQ_PMSFNkb8',
     ALLOW_LEGACY_INVEST_FALLBACK: true,
     ENABLE_CLIENT_TELEMETRY: false
   };
