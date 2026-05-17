@@ -1362,12 +1362,14 @@ function bindAuthListener() {
       showVerify(PENDING_EMAIL, PENDING_NICK);
       return;
     }
-    fetchProfile().then(function () {
-      enterApp();
-    }).catch(function (e) {
-      console.warn('profile on auth change', e);
-      enterApp();
-    });
+    setTimeout(function () {
+      fetchProfile().then(function () {
+        enterApp();
+      }).catch(function (e) {
+        console.warn('profile on auth change', e);
+        enterApp();
+      });
+    }, 100);
   });
 }
 
