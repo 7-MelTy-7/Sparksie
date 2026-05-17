@@ -209,6 +209,7 @@ img, svg { display: block; }
   font-size: 0.78rem;
   font-weight: 400;
   letter-spacing: 0.28em;
+  margin-right: -0.28em;
   text-transform: uppercase;
   color: var(--c-blue);
   opacity: 0.85;

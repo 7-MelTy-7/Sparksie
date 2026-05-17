@@ -12,6 +12,52 @@
 
 'use strict';
 
+const ABOUT_I18N = {
+  en: {
+    navFeed: 'Feed',
+    navAbout: 'About Us',
+    heroEyebrow: 'Our Journey',
+    heroTitle: 'Five moments that define us',
+    heroSub: 'Scroll down — each sphere is a chapter of our story',
+    eyebrow1: 'Who we are',
+    title1: 'WE ARE SPARK',
+    desc1_1: 'We are a small team that believes: every great idea deserves a chance. SPARK is a place where bold thoughts turn into live projects, and people find those who share their vision of the future.',
+    eyebrow2: 'How the idea came',
+    title2: 'THE EUREKA MOMENT',
+    desc2_1: 'We spent hours polishing the concept, moving from crazy giant plans to finding that minimalist essence. It was scary: what if nobody needs this? What if the "cosmic" interface is just a fantasy no one will want to use? Not everything worked out the first time: dozens of ideas went into the trash, and mockups were rewritten from scratch when we realized we were losing "that" vibe.',
+    desc2_1_b: 'On this pure inspiration and drive, the project began to take shape. Later, a second developer joined us — a man of action who took on the technical magic of the code and helped turn our visual dreams into a living, working interface. I value everyone\'s contribution, but at the core of SPARK will forever remain that first impulse and the courage to aim at creating an entire universe for others\' ideas.',
+    desc2_2: 'Everything started with the thought of how many cool ideas never saw the light of day simply because their authors lacked a little confidence. We saw talented people who were afraid to take the first step, fearing criticism or loneliness. In April 2026, we decided to create SPARK. A place where any, even the craziest idea, is a star that we help shine brighter.',
+    eyebrow3: 'The project meaning',
+    title3: 'WHY WE ARE HERE',
+    desc3_1: 'SPARK\'s mission is to create a world where no bright thought fades due to the author\'s insecurity. We change the usual order of things: instead of being left alone with your doubts, you enter an environment where ideas attract support, and support breeds determination. We are here so everyone can turn their inner spark into a shared constellation that changes the world around.',
+    desc3_2: 'Previously, there was a gap between "invented" and "done". We were the first to combine sincere human support and professional growth tools in one chain. Here you get not just feedback, but a foundation for confidence: when the community believes in your idea, and the platform provides resources for its takeoff. This is the first platform in history where belief in a person becomes fuel for real achievements.',
+    eyebrow4: 'Our goals',
+    title4: 'WHERE WE ARE GOING',
+    desc4_1: 'In the coming year, SPARK will focus on launching a new system — a live mechanism for supporting and voting for ideas. We plan to introduce tools for forming teams right inside the platform, so you can find not only support but also partners. Our goal is to gather the first "charged" users around the project and establish connections with incubators ready to give life to our community\'s brightest sparks.',
+    desc4_2: 'In the long term, we see SPARK as a global ecosystem where the path from thought to realization takes a matter of weeks. In a few years, the platform should become a place where anyone, regardless of resources, can get a "ticket to life" for their project. We are building a galaxy in which the success of one user becomes fuel for thousands of others.',
+    eyebrow5: 'Gratitude',
+    title5: 'THANK YOU FOR BEING HERE',
+    desc5_1: 'SPARK is not just lines of code or interface elements. It is primarily you. We are infinitely grateful to everyone who dropped by our fire when there were only a few stars in our sky. Your belief in the project at the very start, your ideas, and your very presence — this is what turns a simple app into a living community. Thank you for trusting us with your sparks and becoming part of this story with us ❤',
+    desc5_2: 'Your personal universe begins here. Remember: any supernova was once just a tiny spark. See you in the orbit of new ideas!',
+    footerRights: '© 2026 SPARK. All rights reserved.',
+    navFeedFooter: 'Feed',
+    navAboutFooter: 'About Us'
+  }
+};
+
+function applyAboutLang() {
+  const lang = localStorage.getItem('lang') || 'en';
+  if (lang !== 'en') return; // Default HTML is RU
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (ABOUT_I18N.en[key]) {
+      el.innerHTML = ABOUT_I18N.en[key];
+    }
+  });
+}
+
+
 /* ═══════════════════════════════════════════════════════════════════════════
    1. STARFIELD ENGINE
    Canvas-слой с мерцающими звёздами.
@@ -616,6 +662,7 @@ function initHeaderBehavior() {
 function init() {
   // Сначала проверяем reduced motion
   respectReducedMotion();
+  applyAboutLang();
 
   // Запускаем все модули
   StarfieldEngine.init();
