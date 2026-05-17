@@ -261,14 +261,13 @@ Deno.serve(async (req) => {
   });
 
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
-  const limited =
-    (await checkRateLimit(admin, `email:${email}`, 3, 15)) ||
-    (await checkRateLimit(admin, `ip:${ip}`, 10, 60));
-  if (limited) {
+  const emailLimited = await checkRateLimit(admin, `email:${email}`, 5, 15);
+  const ipLimited = await checkRateLimit(admin, `ip:${ip}`, 100, 60);
+  
+  if (emailLimited || ipLimited) {
     return json({
-      ok: true,
-      message: 'If this email can be registered, a verification code was sent.',
-    });
+      message: 'Слишком много попыток. Пожалуйста, подождите немного перед следующей отправкой.',
+    }, 429);
   }
 
   const code = randomCode();

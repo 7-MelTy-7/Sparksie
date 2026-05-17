@@ -186,7 +186,7 @@ var I18N = {
     integration_invest: 'Investing is temporarily unavailable.',
     integration_publish: 'Publishing is temporarily unavailable.',
     integration_registration: 'Email verification is unavailable. Deploy register-* edge functions.',
-    regCodeSent: 'Verification code sent. Check your inbox.',
+    regCodeSent: 'Verification code sent. Check your inbox and Spam folder.',
     regEnterCode: 'Enter the 6-digit code from your email',
     regVerifyBtn: 'Complete registration →',
     regBack: '← Back',
@@ -199,6 +199,7 @@ var I18N = {
     reg_err_functions: 'Registration service not found. Deploy register-send-code and register-verify edge functions.',
     reg_err_network: 'Cannot reach the server. Check your connection or site CSP (connect-src must allow *.supabase.co).',
     reg_err_invalid: 'Check email format, password (8+ chars), and nickname (1–30 characters).',
+    reg_err_rate_limit: 'Too many attempts. Please wait 15 minutes.',
     configSetup: 'Supabase is not configured. Copy assets/js/config.example.js to config.js and set your project URL and anon key.',
     aboutUs: 'About Us'
   },
@@ -234,7 +235,7 @@ var I18N = {
     integration_invest: 'Инвестирование временно недоступно.',
     integration_publish: 'Публикация временно недоступна.',
     integration_registration: 'Подтверждение почты недоступно. Разверните edge functions register-*.',
-    regCodeSent: 'Код отправлен. Проверьте почту.',
+    regCodeSent: 'Код отправлен. Проверьте почту (и папку Спам).',
     regEnterCode: 'Введите 6-значный код из письма',
     regVerifyBtn: 'Завершить регистрацию →',
     regBack: '← Назад',
@@ -247,6 +248,7 @@ var I18N = {
     reg_err_functions: 'Сервис регистрации не найден. Разверните edge functions register-send-code и register-verify.',
     reg_err_network: 'Нет связи с сервером. Проверьте интернет или CSP сайта (connect-src должен разрешать *.supabase.co).',
     reg_err_invalid: 'Проверьте почту, пароль (от 8 символов) и ник (1–30 символов).',
+    reg_err_rate_limit: 'Слишком много попыток. Пожалуйста, подождите 15 минут.',
     configSetup: 'Supabase не настроен. Скопируйте assets/js/config.example.js в config.js и укажите URL проекта и anon-ключ.',
     aboutUs: 'О нас'
   }

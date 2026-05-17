@@ -52,6 +52,9 @@ function registrationErrorMessage(result) {
   if (status === 400 && msg.indexOf('Invalid registration') !== -1) {
     return typeof T === 'function' ? T('reg_err_invalid') : msg;
   }
+  if (status === 429) {
+    return typeof T === 'function' ? T('reg_err_rate_limit') : msg;
+  }
   if (msg) return msg;
   return integrationMessage('registration');
 }
