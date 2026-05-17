@@ -195,11 +195,12 @@ var I18N = {
     regInvalidCode: 'Invalid or expired code',
     regComplete: 'Account created. Signing you in…',
     reg_err_migration: 'Registration database is not ready. Run: supabase db push (migration 20260516_pending_registrations).',
-    reg_err_email: 'Email is not configured on the server. Set RESEND_API_KEY or BREVO_API_KEY in Edge Function secrets.',
+    reg_err_email: 'Email is not configured on the server. Set SMTP credentials in Edge Function secrets.',
     reg_err_functions: 'Registration service not found. Deploy register-send-code and register-verify edge functions.',
     reg_err_network: 'Cannot reach the server. Check your connection or site CSP (connect-src must allow *.supabase.co).',
     reg_err_invalid: 'Check email format, password (8+ chars), and nickname (1–30 characters).',
-    configSetup: 'Supabase is not configured. Copy assets/js/config.example.js to config.js and set your project URL and anon key.'
+    configSetup: 'Supabase is not configured. Copy assets/js/config.example.js to config.js and set your project URL and anon key.',
+    aboutUs: 'About Us'
   },
   ru: {
     iot: 'Интерес орбиты', cinv: 'инвесторов', cpool: 'пул', cleft: 'осталось', binv: 'Вложить', bcrit: 'Критика', noResults: 'Идеи не найдены',
@@ -242,12 +243,13 @@ var I18N = {
     regInvalidCode: 'Неверный или просроченный код',
     regComplete: 'Аккаунт создан. Выполняем вход…',
     reg_err_migration: 'База для регистрации не настроена. Выполните: supabase db push (миграция pending_registrations).',
-    reg_err_email: 'Почта на сервере не настроена. Укажите RESEND_API_KEY или BREVO_API_KEY в секретах Edge Functions.',
+    reg_err_email: 'Почта на сервере не настроена. Укажите параметры SMTP в секретах Edge Functions.',
     reg_err_functions: 'Сервис регистрации не найден. Разверните edge functions register-send-code и register-verify.',
     reg_err_network: 'Нет связи с сервером. Проверьте интернет или CSP сайта (connect-src должен разрешать *.supabase.co).',
     reg_err_invalid: 'Проверьте почту, пароль (от 8 символов) и ник (1–30 символов).',
-    configSetup: 'Supabase не настроен. Скопируйте assets/js/config.example.js в config.js и укажите URL проекта и anon-ключ.'
+    configSetup: 'Supabase не настроен. Скопируйте assets/js/config.example.js в config.js и укажите URL проекта и anon-ключ.',
+    aboutUs: 'О нас'
   }
 };
-var LANG = localStorage.getItem('spark_lang') || 'en';
+var LANG = localStorage.getItem('spark_lang') || 'ru';
 function T(k) { return (I18N[LANG] || I18N.en)[k] || I18N.en[k] || k; }
