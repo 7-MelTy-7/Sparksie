@@ -406,6 +406,7 @@ async function doLogout() {
 function enterApp() {
   if (appEntered) return;
   appEntered = true;
+  document.documentElement.classList.remove('auth-active');
   hideVerify();
   var authScreen = document.getElementById('authScreen');
   if (authScreen) authScreen.classList.add('gone');
@@ -432,6 +433,7 @@ function updateHeader() {
 function showVerify(email, nick) {
   PENDING_EMAIL = email;
   if (nick) PENDING_NICK = nick;
+  document.documentElement.classList.add('auth-active');
   var el = document.getElementById('vmEmailDisplay');
   if (el) el.textContent = email;
   setVmErr('');
@@ -1427,6 +1429,7 @@ async function bootApp() {
   }
   // Сессия не восстановлена — снимаем presession-класс, показываем экран входа
   document.documentElement.classList.remove('spark-presession');
+  document.documentElement.classList.add('auth-active');
   var authScreen = document.getElementById('authScreen');
   if (authScreen) authScreen.classList.remove('gone');
   var launchOverlay = document.getElementById('launchOverlay');

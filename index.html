@@ -40,6 +40,7 @@
   }
   @keyframes spin { 100% { transform: rotate(360deg); } }
   #authScreen:not(.gone) ~ .mob-bar { display: none !important; }
+  html.auth-active, html.auth-active body { overflow: hidden !important; height: 100% !important; }
 </style>
 <script>
 (function(){
@@ -49,9 +50,11 @@
       var d=JSON.parse(raw);
       if(d&&d.expires_at&&Math.floor(Date.now()/1000)<d.expires_at){
         document.documentElement.classList.add('spark-presession');
+        return;
       }
     }
   }catch(e){}
+  document.documentElement.classList.add('auth-active');
 })();
 </script>
 </head>
