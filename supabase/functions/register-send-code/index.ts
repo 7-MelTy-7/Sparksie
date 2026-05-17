@@ -159,10 +159,16 @@ function smtpConfigured(): boolean {
   );
 }
 
-async function sendViaSmtp(to: string, code: string): Promise<boolean> {
-  if (!smtpConfigured()) return false;
+let cachedTransport: any = null;
 
-  const transport = nodemailer.createTransport({
+function getSmtpTransport() {
+  if (cachedTransport) return cachedTransport;
+  cachedTransport = nodemailer.createTransport({
+    pool: true, // Использовать пул соединений
+    maxConnections: 5,
+    maxMessages: 100,
+    rateDelta: 1000,
+    rateLimit: 5,
     host: Deno.env.get('SMTP_HOSTNAME')!,
     port: Number(Deno.env.get('SMTP_PORT')),
     secure: Deno.env.get('SMTP_SECURE') === 'true',
@@ -171,6 +177,13 @@ async function sendViaSmtp(to: string, code: string): Promise<boolean> {
       pass: Deno.env.get('SMTP_PASSWORD')!,
     },
   });
+  return cachedTransport;
+}
+
+async function sendViaSmtp(to: string, code: string): Promise<boolean> {
+  if (!smtpConfigured()) return false;
+
+  const transport = getSmtpTransport();
 
   await new Promise<void>((resolve, reject) => {
     transport.sendMail(
@@ -261,8 +274,12 @@ Deno.serve(async (req) => {
   });
 
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
-  const emailLimited = await checkRateLimit(admin, `email:${email}`, 5, 15);
-  const ipLimited = await checkRateLimit(admin, `ip:${ip}`, 100, 60);
+  
+  // Параллельный запрос к БД для экономии времени
+  const [emailLimited, ipLimited] = await Promise.all([
+    checkRateLimit(admin, `email:${email}`, 5, 15),
+    checkRateLimit(admin, `ip:${ip}`, 100, 60)
+  ]);
   
   if (emailLimited || ipLimited) {
     return json({

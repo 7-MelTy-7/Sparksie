@@ -349,8 +349,8 @@ async function doVerifyRegistration() {
     if (signIn.error) throw signIn.error;
     ME = signIn.data.user;
     PROFILE.username = '@' + PENDING_NICK;
+    PROFILE.spk_balance = 4520; // Устанавливаем баланс напрямую, так как мы точно знаем его при создании
     PENDING_REG_PASSWORD = '';
-    await fetchProfile();
     showRegistrationForm();
     enterApp();
   } catch (e) {
