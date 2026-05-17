@@ -46,7 +46,7 @@ const ABOUT_I18N = {
 };
 
 function applyAboutLang() {
-  const lang = localStorage.getItem('lang') || 'en';
+  const lang = localStorage.getItem('lang') || 'ru';
   if (lang !== 'en') return; // Default HTML is RU
 
   document.querySelectorAll('[data-i18n]').forEach(el => {
