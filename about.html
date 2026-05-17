@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#05070a">
+  <title>О нас — SPARK</title>
+
+  <!-- Fonts: Syne (заголовки) + DM Sans (текст) — как в основном проекте -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/css/about.css">
+</head>
+<body>
+
+  <!-- ════════════════════════════════════════════════════
+       LAYER 0 — Звёздное небо (canvas)
+       JS: twinkling state-machine + subtle nebula gradient
+  ════════════════════════════════════════════════════ -->
+  <canvas id="starfield" aria-hidden="true"></canvas>
+
+  <!-- ════════════════════════════════════════════════════
+       LAYER 1 — Градиент-туманность поверх звёзд
+  ════════════════════════════════════════════════════ -->
+  <div class="nebula-bg" aria-hidden="true"></div>
+
+  <!-- ════════════════════════════════════════════════════
+       НАВИГАЦИЯ — минималистичная шапка
+  ════════════════════════════════════════════════════ -->
+  <header class="site-header" role="banner">
+    <a class="logo" href="/" aria-label="SPARK — на главную">
+      <span class="logo-mark">✦</span>
+      <span class="logo-text">SPARK</span>
+    </a>
+    <nav class="header-nav" role="navigation" aria-label="Основная навигация">
+      <a href="index.html">Лента</a>
+      <a href="about.html" class="nav-active" aria-current="page">О нас</a>
+    </nav>
+  </header>
+
+  <!-- ════════════════════════════════════════════════════
+       HERO — вводный экран перед основным контентом
+  ════════════════════════════════════════════════════ -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-eyebrow">Наш путь</div>
+    <h1 class="hero-title" id="hero-title">
+      Пять&nbsp;моментов,<br>которые&nbsp;нас&nbsp;определяют
+    </h1>
+    <p class="hero-sub">
+      Скрольте вниз — каждая сфера это&nbsp;глава нашей истории
+    </p>
+    <div class="hero-scroll-hint" aria-hidden="true">
+      <span class="scroll-line"></span>
+      <span class="scroll-dot"></span>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════
+       SVG ЛИНИЯ-МАРШРУТ
+       Соединяет все 5 планет тонкой нитью.
+       viewBox и точки пересчитываются JS при resize.
+       data-line — маркер для JS-апдейта координат.
+  ════════════════════════════════════════════════════ -->
+  <svg
+    class="path-line"
+    id="pathLine"
+    aria-hidden="true"
+    data-line
+    preserveAspectRatio="none"
+  >
+    <!--
+      JS вставит сюда <path> с реальными координатами центров планет.
+      Fallback (если JS не загрузился) — просто вертикальная линия.
+    -->
+    <path class="path-line__track" id="pathTrack" d="M0,0" />
+    <!-- Анимированная «искра», бегущая по линии -->
+    <circle class="path-line__spark" id="pathSpark" r="3" cx="0" cy="0" />
+  </svg>
+
+  <!-- ════════════════════════════════════════════════════
+       ОСНОВНОЙ КОНТЕНТ — 5 секций-планет
+       Каждая секция:
+         .stop                — контейнер секции
+         .stop__planet-wrap   — сфера + свечение
+         .stop__planet        — сама сфера (CSS градиент)
+         .stop__body          — текстовый блок с shape-outside
+         .stop__index         — порядковый номер (01–05)
+
+       Класс .stop--left  / .stop--right — зигзаг-направление
+       data-color — цвет свечения (передаётся в JS для параллакса)
+  ════════════════════════════════════════════════════ -->
+  <main class="journey" id="journey" role="main">
+
+    <!-- ── СТОП 01 — КТО МЫ ──────────────────────────
+         Цвет: голубой (#7dd3fc)
+         Позиция: слева
+    ─────────────────────────────────────────────────── -->
+    <section
+      class="stop stop--left"
+      id="stop-01"
+      data-index="01"
+      data-color="#7dd3fc"
+      aria-labelledby="stop-01-title"
+    >
+      <div class="stop__planet-wrap" data-planet>
+        <!-- Сфера -->
+        <div class="stop__planet stop__planet--blue" aria-hidden="true">
+          <div class="stop__planet-inner"></div>
+        </div>
+        <!-- Свечение-аура (отдельный слой для blur без влияния на текст) -->
+        <div class="stop__aura stop__aura--blue" aria-hidden="true"></div>
+        <!-- Плавающий номер внутри сферы -->
+        <div class="stop__planet-num" aria-hidden="true">01</div>
+      </div>
+
+      <div class="stop__body stop__body--right">
+        <!-- shape-outside float-элемент для обтекания сферы -->
+        <div class="stop__shape-float stop__shape-float--left" aria-hidden="true"></div>
+
+        <div class="stop__text">
+          <span class="stop__eyebrow" style="color:#7dd3fc">Кто мы</span>
+
+          <!-- ЗАГОЛОВОК: замените на название вашей команды/слоган -->
+          <h2 class="stop__title" id="stop-01-title" style="color:#7dd3fc">
+            <!-- ТЕКСТ: короткий заголовок раздела «Кто мы», 2–4 слова, ВЕРХНИЙ РЕГИСТР -->
+            МЫ — SPARK
+          </h2>
+
+          <!-- ОСНОВНОЙ ТЕКСТ: замените на описание команды и видения -->
+          <p class="stop__desc">
+            <!-- ТЕКСТ: 3–5 предложений о том, кто составляет команду SPARK,
+                 какими ценностями вы руководствуетесь и как видите свою роль
+                 в экосистеме стартапов и идей. -->
+            Мы — небольшая команда, которая верит: каждая большая идея
+            заслуживает шанса. SPARK — это место, где смелые мысли
+            превращаются в живые проекты, а люди находят тех, кто разделяет
+            их видение будущего.
+          </p>
+
+          <!-- ДОПОЛНИТЕЛЬНЫЙ ТЕКСТ (опционально) -->
+          <p class="stop__desc stop__desc--secondary">
+            <!-- ТЕКСТ: дополнительный абзац — кто входит в команду,
+                 какой у вас бэкграунд, откуда вы. -->
+            
+          </p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ── СТОП 02 — КАК ПРИШЛА ИДЕЯ ────────────────
+         Цвет: лавандовый (#c4b5fd)
+         Позиция: справа
+    ─────────────────────────────────────────────────── -->
+    <section
+      class="stop stop--right"
+      id="stop-02"
+      data-index="02"
+      data-color="#c4b5fd"
+      aria-labelledby="stop-02-title"
+    >
+      <div class="stop__planet-wrap" data-planet>
+        <div class="stop__planet stop__planet--lavender" aria-hidden="true">
+          <div class="stop__planet-inner"></div>
+        </div>
+        <div class="stop__aura stop__aura--lavender" aria-hidden="true"></div>
+        <div class="stop__planet-num" aria-hidden="true">02</div>
+      </div>
+
+      <div class="stop__body stop__body--left">
+        <div class="stop__shape-float stop__shape-float--right" aria-hidden="true"></div>
+
+        <div class="stop__text">
+          <span class="stop__eyebrow" style="color:#c4b5fd">Как пришла идея</span>
+
+          <h2 class="stop__title" id="stop-02-title" style="color:#c4b5fd">
+            <!-- ТЕКСТ: заголовок раздела «История», 2–4 слова -->
+            МОМЕНТ ОЗАРЕНИЯ
+          </h2>
+
+          <p class="stop__desc">
+            <!-- ТЕКСТ: история возникновения SPARK — когда, где, при каких
+                 обстоятельствах появилась идея. Конкретная деталь или
+                 момент, который всё изменил. -->
+            Мы часами шлифовали концепцию, переходя от безумных гигантских планов к поиску той самой минималистичной сути. Было страшно: а вдруг это никому не нужно? Вдруг «космический» интерфейс — это просто фантазия, которой никто не захочет пользоваться? Не всё получалось с первого раза: десятки идей летели в корзину, а макеты переписывались с нуля, когда мы понимали, что теряем «тот самый» вайб.
+​На этом чистом вдохновении и драйве проект начал обретать форму. Позже к нам присоединился второй разработчик — человек дела, который взял на себя техническую магию кода и помог превратить наши визуальные мечты в живой, работающий интерфейс. Я ценю вклад каждого, но в ядре SPARK навсегда останется тот первый импульс и смелость замахнуться на создание целой вселенной для чужих идей.
+          </p>
+
+          <p class="stop__desc stop__desc--secondary">
+            <!-- ТЕКСТ: что было дальше — первые шаги, первые сомнения,
+                 первое «да, это работает». -->
+            Всё началось с мысли о том, сколько крутых идей так и не увидели свет просто потому, что их авторам не хватило капельки уверенности. Мы видели талантливых людей, которые боялись сделать первый шаг, опасаясь критики или одиночества.
+​В апреле 2026-го мы решили создать SPARK. Место, где любая, даже самая безумная идея — это звезда, которой мы помогаем разгореться ярче.
+          </p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ── СТОП 03 — СМЫСЛ ПРОЕКТА ───────────────────
+         Цвет: золотой (#fcd34d)
+         Позиция: слева
+    ─────────────────────────────────────────────────── -->
+    <section
+      class="stop stop--left"
+      id="stop-03"
+      data-index="03"
+      data-color="#fcd34d"
+      aria-labelledby="stop-03-title"
+    >
+      <div class="stop__planet-wrap" data-planet>
+        <div class="stop__planet stop__planet--gold" aria-hidden="true">
+          <div class="stop__planet-inner"></div>
+        </div>
+        <div class="stop__aura stop__aura--gold" aria-hidden="true"></div>
+        <div class="stop__planet-num" aria-hidden="true">03</div>
+      </div>
+
+      <div class="stop__body stop__body--right">
+        <div class="stop__shape-float stop__shape-float--left" aria-hidden="true"></div>
+
+        <div class="stop__text">
+          <span class="stop__eyebrow" style="color:#fcd34d">Смысл проекта</span>
+
+          <h2 class="stop__title" id="stop-03-title" style="color:#fcd34d">
+            <!-- ТЕКСТ: заголовок миссии, 2–4 слова -->
+            ЗАЧЕМ МЫ ЗДЕСЬ
+          </h2>
+
+          <p class="stop__desc">
+            <!-- ТЕКСТ: главная ценность и миссия SPARK.
+                 Что вы меняете в мире? Какую проблему решаете?
+                 Почему это важно именно сейчас? -->
+            Миссия SPARK — создать мир, где ни одна яркая мысль не гаснет из-за неуверенности автора. Мы меняем привычный порядок вещей: вместо того чтобы оставаться один на один со своими сомнениями, вы попадаете в среду, где идеи притягивают поддержку, а поддержка рождает решимость. Мы здесь, чтобы каждый мог превратить свою внутреннюю искру в общее созвездие, которое меняет мир вокруг.
+          </p>
+
+          <p class="stop__desc stop__desc--secondary">
+            <!-- ТЕКСТ: конкретный пример ценности — что получает
+                 пользователь, которого раньше не было нигде. -->
+            Раньше между „придуманным“ и „сделанным“ лежала пропасть. Мы первыми объединили искреннюю человеческую поддержку и профессиональные инструменты роста в одну цепочку. Здесь вы получаете не просто отзывы, а фундамент для уверенности: когда сообщество верит в вашу идею, а платформа дает ресурсы для её взлета. Это первая в истории площадка, где вера в человека становится топливом для реальных достижений.
+          </p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ── СТОП 04 — ЦЕЛИ ─────────────────────────────
+         Цвет: мятный (#6ee7b7)
+         Позиция: справа
+    ─────────────────────────────────────────────────── -->
+    <section
+      class="stop stop--right"
+      id="stop-04"
+      data-index="04"
+      data-color="#6ee7b7"
+      aria-labelledby="stop-04-title"
+    >
+      <div class="stop__planet-wrap" data-planet>
+        <div class="stop__planet stop__planet--mint" aria-hidden="true">
+          <div class="stop__planet-inner"></div>
+        </div>
+        <div class="stop__aura stop__aura--mint" aria-hidden="true"></div>
+        <div class="stop__planet-num" aria-hidden="true">04</div>
+      </div>
+
+      <div class="stop__body stop__body--left">
+        <div class="stop__shape-float stop__shape-float--right" aria-hidden="true"></div>
+
+        <div class="stop__text">
+          <span class="stop__eyebrow" style="color:#6ee7b7">Наши цели</span>
+
+          <h2 class="stop__title" id="stop-04-title" style="color:#6ee7b7">
+            <!-- ТЕКСТ: заголовок раздела целей, 2–4 слова -->
+            КУДА МЫ ИДЁМ
+          </h2>
+
+          <p class="stop__desc">
+            <!-- ТЕКСТ: ближайшие и долгосрочные цели проекта.
+                 Что планируете выпустить? Какой аудитории достичь?
+                 Какие рынки или страны? -->
+            В ближайший год SPARK сосредоточится на запуске новой системы — живого механизма поддержки и голосования за идеи. Мы планируем внедрить инструменты для формирования команд прямо внутри платформы, чтобы вы могли находить не только поддержку, но и партнеров. Наша цель — собрать вокруг проекта первых «заряженных» пользователей и наладить связи с инкубаторами, которые готовы давать жизнь самым ярким искрам нашего сообщества.
+          </p>
+
+          <p class="stop__desc stop__desc--secondary">
+            <!-- ТЕКСТ: амбиции на 3–5 лет, большая цель. -->
+            В долгосрочной перспективе мы видим SPARK как глобальную экосистему, где путь от мысли до реализации проекта занимает считанные недели. Через несколько лет платформа должна стать местом, где любой человек, независимо от ресурсов, может получить «билет в жизнь» для своего проекта. Мы строим галактику, в которой успех одного пользователя становится топливом для тысяч других.
+          </p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ── СТОП 05 — БЛАГОДАРНОСТЬ ────────────────────
+         Цвет: коралловый (#fca5a5)
+         Позиция: слева, финальный
+    ─────────────────────────────────────────────────── -->
+    <section
+      class="stop stop--left stop--final"
+      id="stop-05"
+      data-index="05"
+      data-color="#fca5a5"
+      aria-labelledby="stop-05-title"
+    >
+      <div class="stop__planet-wrap" data-planet>
+        <div class="stop__planet stop__planet--coral" aria-hidden="true">
+          <div class="stop__planet-inner"></div>
+        </div>
+        <div class="stop__aura stop__aura--coral" aria-hidden="true"></div>
+        <div class="stop__planet-num" aria-hidden="true">05</div>
+      </div>
+
+      <div class="stop__body stop__body--right">
+        <div class="stop__shape-float stop__shape-float--left" aria-hidden="true"></div>
+
+        <div class="stop__text">
+          <span class="stop__eyebrow" style="color:#fca5a5">Благодарность</span>
+
+          <h2 class="stop__title" id="stop-05-title" style="color:#fca5a5">
+            <!-- ТЕКСТ: заголовок финального слова, 2–4 слова -->
+            СПАСИБО, ЧТО ВЫ ЗДЕСЬ
+          </h2>
+
+          <p class="stop__desc">
+            <!-- ТЕКСТ: финальное слово к пользователям — тем, кто
+                 пришёл на платформу, поверил в идею, поддержал проект.
+                 Личное, тёплое, искреннее. -->
+            SPARK — это не просто строки кода или элементы интерфейса. Это прежде всего вы. Мы бесконечно благодарны каждому, кто заглянул к нам на огонек, когда на нашем небе было всего несколько звезд. Ваша вера в проект на самом старте, ваши идеи и само ваше присутствие — это то, что превращает простое приложение в живое сообщество. Спасибо, что доверили нам свои искры и стали частью этой истории вместе с нами ❤
+          </p>
+
+          <p class="stop__desc stop__desc--secondary">
+            <!-- ТЕКСТ: призыв к действию или финальная фраза,
+                 которую хочется запомнить. -->
+            Ваша личная вселенная начинается здесь. Помните: любая сверхновая когда-то была лишь крошечной искрой. До встречи на орбите новых идей!
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main><!-- /.journey -->
+
+
+  <!-- ════════════════════════════════════════════════════
+       FOOTER
+  ════════════════════════════════════════════════════ -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-inner">
+      <span class="footer-logo">✦ SPARK</span>
+      <span class="footer-copy">
+        <!-- ТЕКСТ: год и название компании/команды -->
+        © 2026 SPARK. Все права защищены.
+      </span>
+      <nav class="footer-nav" aria-label="Навигация в подвале">
+        <a href="index.html">Лента</a>
+        <a href="about.html" aria-current="page">О нас</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="assets/js/about.js"></script>
+</body>
+</html>

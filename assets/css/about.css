@@ -1,0 +1,782 @@
+/* ═══════════════════════════════════════════════════════════════
+   SPARK — О НАС | style.css  v2.0
+   Концепция: «Премиальный минимализм и космический путь»
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ──────────────────────────────────────────────────────────────
+   0. CSS-переменные
+────────────────────────────────────────────────────────────────*/
+:root {
+  /* Палитра */
+  --bg:          #05070a;
+  --bg-mid:      #080c12;
+  --ivory:       #fdf5e6;
+  --ivory-dim:   rgba(253, 245, 230, 0.60);
+  --ivory-muted: rgba(253, 245, 230, 0.30);
+  --white-line:  rgba(255, 255, 255, 0.15);
+
+  /* Цвета свечений */
+  --c-blue:    #7dd3fc;
+  --c-lav:     #c4b5fd;
+  --c-gold:    #fcd34d;
+  --c-mint:    #6ee7b7;
+  --c-coral:   #fca5a5;
+
+  /* Размеры планет — крупнее, ~25vw */
+  --planet-size:    clamp(260px, 27vw, 400px);
+  --planet-size-sm: clamp(200px, 20vw, 300px);
+
+  /* Типографика */
+  --font-display: 'Syne', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+
+  /* Переходы */
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out:    cubic-bezier(0.0, 0, 0.2, 1);
+}
+
+/* ──────────────────────────────────────────────────────────────
+   1. Сброс и база
+────────────────────────────────────────────────────────────────*/
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--ivory);
+  font-family: var(--font-body);
+  font-weight: 300;
+  line-height: 1.7;
+  overflow-x: hidden;
+  cursor: default;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img, svg { display: block; }
+
+/* ──────────────────────────────────────────────────────────────
+   2. Звёздное небо — canvas
+────────────────────────────────────────────────────────────────*/
+#starfield {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   3. Туманность-фон (nebula gradient) — поверх звёзд
+────────────────────────────────────────────────────────────────*/
+.nebula-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 65% 45% at 10% 15%,  rgba(125, 211, 252, 0.055) 0%, transparent 65%),
+    radial-gradient(ellipse 55% 40% at 88% 55%,  rgba(196, 181, 253, 0.05)  0%, transparent 60%),
+    radial-gradient(ellipse 50% 35% at 50% 92%,  rgba(252, 165, 165, 0.045) 0%, transparent 60%),
+    radial-gradient(ellipse 45% 55% at 72% 8%,   rgba(252, 211, 77,  0.035) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 30% at 30% 70%,  rgba(110, 231, 183, 0.03)  0%, transparent 60%);
+}
+
+/* ──────────────────────────────────────────────────────────────
+   4. Хедер
+────────────────────────────────────────────────────────────────*/
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 3rem;
+  background: linear-gradient(to bottom, rgba(5,7,10,0.95) 0%, transparent 100%);
+  backdrop-filter: blur(0px);
+  transition:
+    backdrop-filter 0.4s var(--ease-smooth),
+    background      0.4s var(--ease-smooth),
+    transform       0.4s var(--ease-smooth);
+}
+
+.site-header.scrolled {
+  backdrop-filter: blur(18px);
+  background: rgba(5, 7, 10, 0.80);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+/* Скрытие при быстром скролле вниз */
+.site-header.header--hidden {
+  transform: translateY(-100%);
+}
+
+/* Логотип */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.2rem;
+  letter-spacing: 0.06em;
+  color: var(--ivory);
+  transition: opacity 0.3s;
+}
+.logo:hover { opacity: 0.75; }
+
+.logo-mark {
+  font-size: 1rem;
+  color: var(--c-gold);
+  display: inline-block;
+  animation: sparkle 4s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% { transform: scale(1)   rotate(0deg);   opacity: 1; }
+  40%       { transform: scale(1.3) rotate(20deg);  opacity: 0.8; }
+  60%       { transform: scale(0.9) rotate(-10deg); opacity: 1; }
+}
+
+/* Навигация */
+.header-nav {
+  display: flex;
+  gap: 2rem;
+  font-size: 0.875rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--ivory-dim);
+}
+
+.header-nav a {
+  position: relative;
+  transition: color 0.3s;
+}
+.header-nav a::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0; right: 0;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.35s var(--ease-smooth);
+}
+.header-nav a:hover,
+.header-nav .nav-active {
+  color: var(--ivory);
+}
+.header-nav a:hover::after,
+.header-nav .nav-active::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   5. Hero-секция
+────────────────────────────────────────────────────────────────*/
+.hero {
+  position: relative;
+  z-index: 10;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 8rem 2rem 4rem;
+}
+
+.hero-eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 400;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--c-blue);
+  opacity: 0.85;
+  margin-bottom: 1.5rem;
+  animation: fadeUp 1s var(--ease-smooth) 0.2s both;
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2.4rem, 6vw, 5rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--ivory);
+  max-width: 800px;
+  animation: fadeUp 1s var(--ease-smooth) 0.4s both;
+}
+
+.hero-sub {
+  margin-top: 1.8rem;
+  font-size: 1rem;
+  color: var(--ivory-muted);
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  animation: fadeUp 1s var(--ease-smooth) 0.6s both;
+}
+
+/* Индикатор скролла */
+.hero-scroll-hint {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  animation: fadeUp 1s var(--ease-smooth) 1s both;
+  transition: opacity 0.5s var(--ease-smooth);
+}
+
+.scroll-line {
+  display: block;
+  width: 1px;
+  height: 48px;
+  background: linear-gradient(to bottom, transparent, var(--ivory-muted));
+}
+.scroll-dot {
+  display: block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--ivory-muted);
+  animation: scrollBounce 2s ease-in-out infinite;
+}
+
+@keyframes scrollBounce {
+  0%, 100% { transform: translateY(0); opacity: 0.5; }
+  50%       { transform: translateY(6px); opacity: 1; }
+}
+
+/* ──────────────────────────────────────────────────────────────
+   6. SVG маршрутная линия
+────────────────────────────────────────────────────────────────*/
+.path-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+  z-index: 5;
+  overflow: visible;
+}
+
+.path-line__track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.14);
+  stroke-width: 1.5px;
+  /* Плавная линия без пунктира — как нить маршрута */
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Анимированная искра на линии */
+.path-line__spark {
+  fill: rgba(255, 255, 255, 0.9);
+  filter: drop-shadow(0 0 5px rgba(255,255,255,0.9))
+          drop-shadow(0 0 12px rgba(255,255,255,0.4));
+  transition: opacity 0.4s;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   7. JOURNEY — основной контейнер
+────────────────────────────────────────────────────────────────*/
+.journey {
+  position: relative;
+  z-index: 10;
+  padding: 4rem 0 12rem;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   8. STOP — секция с планетой
+────────────────────────────────────────────────────────────────*/
+.stop {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 100svh;
+  padding: 6rem 0;
+  /* Плавное появление при скролле (управляется JS классом is-visible) */
+}
+
+/* Зигзаг: левые — планета слева, правые — справа */
+.stop--left {
+  flex-direction: row;
+  padding-left:  clamp(3rem, 6vw, 8rem);
+  padding-right: clamp(2rem, 6vw, 8rem);
+}
+
+.stop--right {
+  flex-direction: row-reverse;
+  padding-right: clamp(3rem, 6vw, 8rem);
+  padding-left:  clamp(2rem, 6vw, 8rem);
+}
+
+/* ──────────────────────────────────────────────────────────────
+   9. Планета — обёртка и сфера
+────────────────────────────────────────────────────────────────*/
+.stop__planet-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width:  var(--planet-size);
+  height: var(--planet-size);
+  transition: transform 0.9s var(--ease-spring);
+  will-change: transform;
+  /* z-index чтобы свечение было поверх текста */
+  z-index: 2;
+}
+
+/* Увеличение при активации */
+.stop__planet-wrap.is-active {
+  transform: scale(1.28);
+}
+
+/* Hover: лёгкое дополнительное увеличение */
+.stop__planet-wrap.is-hovered {
+  transform: scale(1.06);
+}
+.stop__planet-wrap.is-active.is-hovered {
+  transform: scale(1.32);
+}
+
+/* Сама сфера — матовая, кремовая, объёмная */
+.stop__planet {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  background: radial-gradient(
+    ellipse 62% 58% at 33% 28%,
+    rgba(255, 255, 255, 0.65) 0%,
+    var(--ivory)              28%,
+    #d8cdb6                   62%,
+    #a99c88                   100%
+  );
+  box-shadow:
+    inset 0 0 35px 10px rgba(0, 0, 0, 0.38),
+    inset -15px -12px 30px  rgba(0, 0, 0, 0.28);
+  transition: transform 0.9s var(--ease-spring);
+}
+
+/* Вращение активной планеты — очень медленно */
+.stop__planet-wrap.is-active .stop__planet {
+  animation: rotateSphere 22s linear infinite;
+}
+
+@keyframes rotateSphere {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Внутренний тень-слой для глубины */
+.stop__planet-inner {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse 85% 85% at 68% 72%,
+    rgba(0, 0, 0, 0.14) 0%,
+    transparent 58%
+  );
+}
+
+/* Номер внутри планеты */
+.stop__planet-num {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2rem, 3.8vw, 3.4rem);
+  letter-spacing: 0.04em;
+  color: rgba(5, 7, 10, 0.40);
+  z-index: 2;
+  user-select: none;
+  transition: opacity 0.4s;
+}
+
+.stop__planet-wrap.is-active .stop__planet-num {
+  animation: counterRotate 22s linear infinite;
+  opacity: 0.55;
+}
+
+@keyframes counterRotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
+}
+
+/* ──────────────────────────────────────────────────────────────
+   10. Ауры (свечение) — отдельный слой позади планеты
+────────────────────────────────────────────────────────────────*/
+.stop__aura {
+  position: absolute;
+  inset: -35%;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+  transition:
+    opacity   0.9s var(--ease-smooth),
+    transform 0.9s var(--ease-spring);
+  opacity: 0.14;
+}
+
+/* Активная аура */
+.stop__planet-wrap.is-active .stop__aura {
+  opacity: 0.38;
+  transform: scale(1.12);
+  animation: auraPulse 5s ease-in-out infinite;
+}
+
+/* Hover: аура слегка оживает */
+.stop__planet-wrap.is-hovered .stop__aura {
+  opacity: 0.25;
+  transform: scale(1.06);
+}
+
+@keyframes auraPulse {
+  0%, 100% { opacity: 0.33; transform: scale(1.10); }
+  50%       { opacity: 0.44; transform: scale(1.18); }
+}
+
+/* Цвета аур */
+.stop__aura--blue     { background: radial-gradient(circle, rgba(125, 211, 252, 1.0) 0%, transparent 68%); }
+.stop__aura--lavender { background: radial-gradient(circle, rgba(196, 181, 253, 1.0) 0%, transparent 68%); }
+.stop__aura--gold     { background: radial-gradient(circle, rgba(252, 211, 77,  1.0) 0%, transparent 68%); }
+.stop__aura--mint     { background: radial-gradient(circle, rgba(110, 231, 183, 1.0) 0%, transparent 68%); }
+.stop__aura--coral    { background: radial-gradient(circle, rgba(252, 165, 165, 1.0) 0%, transparent 68%); }
+
+/* box-shadow на планете — базовое свечение */
+.stop__planet--blue     { box-shadow: 0 0 70px 14px rgba(125, 211, 252, 0.22), inset 0 0 35px 10px rgba(0,0,0,0.38), inset -15px -12px 30px rgba(0,0,0,0.28); }
+.stop__planet--lavender { box-shadow: 0 0 70px 14px rgba(196, 181, 253, 0.22), inset 0 0 35px 10px rgba(0,0,0,0.38), inset -15px -12px 30px rgba(0,0,0,0.28); }
+.stop__planet--gold     { box-shadow: 0 0 70px 14px rgba(252, 211, 77,  0.22), inset 0 0 35px 10px rgba(0,0,0,0.38), inset -15px -12px 30px rgba(0,0,0,0.28); }
+.stop__planet--mint     { box-shadow: 0 0 70px 14px rgba(110, 231, 183, 0.22), inset 0 0 35px 10px rgba(0,0,0,0.38), inset -15px -12px 30px rgba(0,0,0,0.28); }
+.stop__planet--coral    { box-shadow: 0 0 70px 14px rgba(252, 165, 165, 0.22), inset 0 0 35px 10px rgba(0,0,0,0.38), inset -15px -12px 30px rgba(0,0,0,0.28); }
+
+/* Усиленное свечение активной планеты */
+.stop__planet-wrap.is-active .stop__planet--blue     { box-shadow: 0 0 120px 30px rgba(125, 211, 252, 0.32), inset 0 0 35px 10px rgba(0,0,0,0.38), inset -15px -12px 30px rgba(0,0,0,0.28); }
+.stop__planet-wrap.is-active .stop__planet--lavender { box-shadow: 0 0 120px 30px rgba(196, 181, 253, 0.32), inset 0 0 35px 10px rgba(0,0,0,0.38), inset -15px -12px 30px rgba(0,0,0,0.28); }
+.stop__planet-wrap.is-active .stop__planet--gold     { box-shadow: 0 0 120px 30px rgba(252, 211, 77,  0.32), inset 0 0 35px 10px rgba(0,0,0,0.38), inset -15px -12px 30px rgba(0,0,0,0.28); }
+.stop__planet-wrap.is-active .stop__planet--mint     { box-shadow: 0 0 120px 30px rgba(110, 231, 183, 0.32), inset 0 0 35px 10px rgba(0,0,0,0.38), inset -15px -12px 30px rgba(0,0,0,0.28); }
+.stop__planet-wrap.is-active .stop__planet--coral    { box-shadow: 0 0 120px 30px rgba(252, 165, 165, 0.32), inset 0 0 35px 10px rgba(0,0,0,0.38), inset -15px -12px 30px rgba(0,0,0,0.28); }
+
+
+/* ──────────────────────────────────────────────────────────────
+   12. АНИМАЦИЯ ТЕКСТА — ИСПРАВЛЕНИЕ ПРОБЛЕМЫ 1
+   
+   Три состояния:
+     • начальное (невидимое)  — opacity:0, translateY(32px)
+     • .text-visible          — добавляет JS через IntersectionObserver
+     • .stop.is-active        — альтернативный CSS-селектор
+   
+   Оба пути приводят к одному результату.
+────────────────────────────────────────────────────────────────*/
+
+/* Начальное скрытое состояние */
+.stop__text {
+  opacity: 0;
+  transform: translateY(32px);
+  transition:
+    opacity   0.9s var(--ease-out)    0.1s,
+    transform 0.9s var(--ease-smooth) 0.1s;
+  /* Без will-change — не нужно, transition и так GPU-ускорен */
+}
+
+/* ── ПУТЬ 1: JS добавляет класс .text-visible через IntersectionObserver ──
+   Именно этот класс не был определён в старом CSS — ИСПРАВЛЕНО */
+.stop__text.text-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── ПУТЬ 2: CSS-каскад — когда секция получает .is-active ── */
+.stop.is-active .stop__text {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── ПУТЬ 3: Резервный — через активную планету (старый селектор Gemini) ── */
+.stop__planet-wrap.is-active ~ .stop__body .stop__text {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Разные задержки для элементов внутри текста — каскадный эффект */
+.stop.is-active .stop__eyebrow,
+.stop__text.text-visible .stop__eyebrow {
+  transition-delay: 0.05s;
+}
+.stop.is-active .stop__title,
+.stop__text.text-visible .stop__title {
+  transition-delay: 0.18s;
+}
+.stop.is-active .stop__desc:nth-of-type(1),
+.stop__text.text-visible .stop__desc:nth-of-type(1) {
+  transition-delay: 0.30s;
+}
+.stop.is-active .stop__desc:nth-of-type(2),
+.stop__text.text-visible .stop__desc:nth-of-type(2) {
+  transition-delay: 0.44s;
+}
+
+/* Каждый дочерний элемент тоже плавно появляется */
+.stop__eyebrow,
+.stop__title,
+.stop__desc {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity   0.7s var(--ease-out)    0.05s,
+    transform 0.7s var(--ease-smooth) 0.05s;
+}
+
+.stop.is-active .stop__eyebrow,
+.stop.is-active .stop__title,
+.stop.is-active .stop__desc,
+.stop__text.text-visible .stop__eyebrow,
+.stop__text.text-visible .stop__title,
+.stop__text.text-visible .stop__desc {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ──────────────────────────────────────────────────────────────
+   13. Типографика текстового блока
+────────────────────────────────────────────────────────────────*/
+.stop__eyebrow {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  margin-bottom: 0.9rem;
+  opacity: 0; /* управляется через анимацию выше */
+}
+
+.stop__title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.9rem, 3.8vw, 3.5rem);
+  line-height: 1.04;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  margin-bottom: 1.6rem;
+  opacity: 0; /* управляется через анимацию выше */
+}
+
+.stop__desc {
+  font-size: clamp(0.92rem, 1.25vw, 1.07rem);
+  font-weight: 300;
+  line-height: 1.78;
+  color: var(--ivory-dim);
+  max-width: 480px;
+  opacity: 0; /* управляется через анимацию выше */
+}
+
+.stop__desc + .stop__desc {
+  margin-top: 1rem;
+}
+
+.stop__desc--secondary {
+  color: var(--ivory-muted);
+  font-size: clamp(0.85rem, 1.1vw, 0.98rem);
+}
+
+/* Выравнивание — зигзаг на ПК */
+.stop--left  .stop__text  { text-align: right; }
+.stop--right .stop__text  { text-align: left; }
+
+/* Текст по краям страницы (justify) на ПК */
+@media (min-width: 901px) {
+  .stop__desc {
+    text-align: justify;
+    text-align-last: left;
+    hyphens: auto;
+  }
+  .stop--left .stop__desc {
+    text-align-last: right;
+    margin-left: auto;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────
+   14. Footer
+────────────────────────────────────────────────────────────────*/
+.site-footer {
+  position: relative;
+  z-index: 10;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 3rem;
+  background: linear-gradient(to top, rgba(5,7,10,0.98) 0%, transparent 100%);
+}
+
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.footer-logo {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 0.06em;
+  color: var(--ivory-dim);
+}
+
+.footer-copy {
+  font-size: 0.8rem;
+  color: var(--ivory-muted);
+  letter-spacing: 0.03em;
+}
+
+.footer-nav {
+  display: flex;
+  gap: 1.8rem;
+  font-size: 0.8rem;
+  color: var(--ivory-muted);
+  letter-spacing: 0.04em;
+}
+
+.footer-nav a {
+  transition: color 0.3s;
+}
+.footer-nav a:hover {
+  color: var(--ivory);
+}
+
+/* ──────────────────────────────────────────────────────────────
+   15. Вспомогательные анимации
+────────────────────────────────────────────────────────────────*/
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────
+   16. Медиазапросы — адаптив
+────────────────────────────────────────────────────────────────*/
+@media (max-width: 900px) {
+  :root {
+    --planet-size: clamp(200px, 44vw, 280px);
+  }
+
+  .site-header {
+    padding: 1rem 1.5rem;
+  }
+
+  .header-nav {
+    gap: 1.2rem;
+    font-size: 0.82rem;
+  }
+
+  .stop {
+    flex-direction: column !important;
+    align-items: center;
+    text-align: center !important;
+    padding: 5rem 1.5rem 3rem;
+    gap: 2.5rem;
+  }
+
+  .stop--left,
+  .stop--right {
+    padding-left:  1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  .stop__body--right,
+  .stop__body--left {
+    padding: 0;
+  }
+
+  /* Убираем shape-outside на планшете/мобилке */
+  .stop__shape-float--left,
+  .stop__shape-float--right {
+    display: none;
+  }
+
+  .stop__text {
+    text-align: center !important;
+  }
+
+  .stop__desc {
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 600px) {
+  :root {
+    --planet-size: clamp(170px, 58vw, 230px);
+  }
+
+  .hero-title {
+    font-size: clamp(1.9rem, 8vw, 3rem);
+  }
+
+  .footer-inner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .footer-nav {
+    gap: 1.2rem;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────
+   17. Доступность — prefers-reduced-motion
+────────────────────────────────────────────────────────────────*/
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  html { scroll-behavior: auto; }
+
+  /* При reduced-motion сразу показываем текст */
+  .stop__text,
+  .stop__eyebrow,
+  .stop__title,
+  .stop__desc {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

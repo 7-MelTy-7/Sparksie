@@ -760,6 +760,8 @@ function profileHTML(sfx) {
     + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--mu)"><polyline points="9 18 15 12 9 6"/></svg></div>'
     + '<div class="sset" data-pulse="1"><span>' + T('privacy') + '</span>'
     + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--mu)"><polyline points="9 18 15 12 9 6"/></svg></div>'
+    + '<a class="sset" href="about.html" style="text-decoration:none;color:inherit"><span>' + (typeof T === 'function' && T('aboutUs') !== 'aboutUs' ? T('aboutUs') : (window.LANG === 'ru' ? 'О нас' : 'About us')) + '</span>'
+    + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--mu)"><polyline points="9 18 15 12 9 6"/></svg></a>'
     + '<div class="sset" data-logout="1"><span style="color:var(--red)">' + T('logout') + '</span>'
     + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--red)"><polyline points="9 18 15 12 9 6"/></svg></div>'
     + '</div>';
