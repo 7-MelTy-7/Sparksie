@@ -21,6 +21,21 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <link rel="stylesheet" href="assets/css/main.css">
+<!-- Мгновенное скрытие экрана входа при наличии сессии (до рендера) -->
+<style>html.spark-presession #authScreen{display:none!important}</style>
+<script>
+(function(){
+  try{
+    var raw=localStorage.getItem('sb-ppehttbtrlavnrytoweu-auth-token');
+    if(raw){
+      var d=JSON.parse(raw);
+      if(d&&d.expires_at&&Math.floor(Date.now()/1000)<d.expires_at){
+        document.documentElement.classList.add('spark-presession');
+      }
+    }
+  }catch(e){}
+})();
+</script>
 </head>
 <body>
 

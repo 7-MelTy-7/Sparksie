@@ -1423,6 +1423,10 @@ async function bootApp() {
       return;
     }
   }
+  // Сессия не восстановлена — снимаем presession-класс, показываем экран входа
+  document.documentElement.classList.remove('spark-presession');
+  var authScreen = document.getElementById('authScreen');
+  if (authScreen) authScreen.classList.remove('gone');
   applyLang();
 }
 
