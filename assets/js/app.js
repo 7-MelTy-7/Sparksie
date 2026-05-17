@@ -409,6 +409,8 @@ function enterApp() {
   hideVerify();
   var authScreen = document.getElementById('authScreen');
   if (authScreen) authScreen.classList.add('gone');
+  var launchOverlay = document.getElementById('launchOverlay');
+  if (launchOverlay) launchOverlay.classList.add('gone');
   updateHeader();
   renderProfile();
   initRealtime();
@@ -1427,6 +1429,8 @@ async function bootApp() {
   document.documentElement.classList.remove('spark-presession');
   var authScreen = document.getElementById('authScreen');
   if (authScreen) authScreen.classList.remove('gone');
+  var launchOverlay = document.getElementById('launchOverlay');
+  if (launchOverlay) launchOverlay.classList.add('gone');
   applyLang();
 }
 

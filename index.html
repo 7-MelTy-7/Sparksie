@@ -22,11 +22,27 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <link rel="stylesheet" href="assets/css/main.css">
 <!-- Мгновенное скрытие экрана входа при наличии сессии (до рендера) -->
-<style>html.spark-presession #authScreen{display:none!important}</style>
+<style>
+  html.spark-presession #authScreen { display: none !important; }
+  /* Экран загрузки-перехода */
+  #launchOverlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--bg); display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 1.5rem;
+    transition: opacity 0.5s ease;
+  }
+  #launchOverlay.gone { opacity: 0; pointer-events: none; }
+  .launch-spinner {
+    width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1);
+    border-top-color: var(--c-gold); border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { 100% { transform: rotate(360deg); } }
+</style>
 <script>
 (function(){
   try{
-    var raw=localStorage.getItem('sb-ppehttbtrlavnrytoweu-auth-token');
+    var raw=localStorage.getItem('spark_auth');
     if(raw){
       var d=JSON.parse(raw);
       if(d&&d.expires_at&&Math.floor(Date.now()/1000)<d.expires_at){
@@ -38,6 +54,17 @@
 </script>
 </head>
 <body>
+
+<!-- Экран загрузки для плавного перехода -->
+<div id="launchOverlay">
+  <div class="launch-spinner"></div>
+  <div style="color:var(--ivory-dim);font-size:0.9rem;letter-spacing:0.05em;" id="launchText">Загрузка профиля...</div>
+</div>
+<script>
+  if(!document.documentElement.classList.contains('spark-presession')) {
+    document.getElementById('launchOverlay').classList.add('gone');
+  }
+</script>
 
 <!-- Декоративные сферы -->
 <div class="orb orb-b" aria-hidden="true"></div>
