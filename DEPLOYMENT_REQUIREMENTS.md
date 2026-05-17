@@ -10,8 +10,8 @@
 
 ## Первый деплой Supabase (новый проект)
 
-**Project ref:** `ykmtewsfkgduvkmguasv`  
-**URL:** `https://ykmtewsfkgduvkmguasv.supabase.co`
+**Project ref:** `ppehttbtrlavnrytoweu`  
+**URL:** `https://ppehttbtrlavnrytoweu.supabase.co`
 
 ### 1. Установить CLI
 
@@ -31,7 +31,7 @@
 ```bash
 cd SPARK
 supabase login
-supabase link --project-ref ykmtewsfkgduvkmguasv
+supabase link --project-ref ppehttbtrlavnrytoweu
 supabase db push
 ```
 
@@ -51,7 +51,7 @@ supabase secrets set --env-file .env
 Или по одному:
 
 ```bash
-supabase secrets set SUPABASE_URL=https://ykmtewsfkgduvkmguasv.supabase.co
+supabase secrets set SUPABASE_URL=https://ppehttbtrlavnrytoweu.supabase.co
 supabase secrets set SUPABASE_SERVICE_ROLE_KEY=...
 supabase secrets set REGISTRATION_PEPPER=...
 supabase secrets set BREVO_API_KEY=...
