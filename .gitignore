@@ -1,0 +1,10 @@
+# Локальные секреты — скопируйте из .env.example и assets/js/config.example.js
+.env
+.env.local
+
+# Локальный config (скопируйте assets/js/config.example.js → assets/js/config.js)
+assets/js/config.js
+
+# Временные файлы Supabase CLI
+supabase/.temp/
+.vscode/
