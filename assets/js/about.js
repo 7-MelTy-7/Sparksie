@@ -14,7 +14,7 @@
 
 const ABOUT_I18N = {
   en: {
-    navFeed: 'Feed',
+    navFeed: 'Explore',
     navAbout: 'About Us',
     heroEyebrow: 'Our Journey',
     heroTitle: 'Five moments that define us',
@@ -40,7 +40,7 @@ const ABOUT_I18N = {
     desc5_1: 'SPARK is not just lines of code or interface elements. It is primarily you. We are infinitely grateful to everyone who dropped by our fire when there were only a few stars in our sky. Your belief in the project at the very start, your ideas, and your very presence — this is what turns a simple app into a living community. Thank you for trusting us with your sparks and becoming part of this story with us ❤',
     desc5_2: 'Your personal universe begins here. Remember: any supernova was once just a tiny spark. See you in the orbit of new ideas!',
     footerRights: '© 2026 SPARK. All rights reserved.',
-    navFeedFooter: 'Feed',
+    navFeedFooter: 'Explore',
     navAboutFooter: 'About Us'
   }
 };

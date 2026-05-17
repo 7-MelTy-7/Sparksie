@@ -165,7 +165,7 @@ var I18N = {
     verifyDone: '✅ I confirmed', resendMail: 'Send email again',
     profile: 'Profile', postIdea: '+ Post Idea', wallet: 'Wallet', trendingNow: 'Trending Now', leaderboard: 'Prophet Leaderboard',
     liveActivity: 'Live Activity', sortLabel: 'Sort:', tagLabel: 'Tag:', all: 'All', newSort: '🕐 New', popularSort: '🔥 Popular',
-    profitSort: '📈 Profitable', endingSort: '⏱ Ending soon', feed: 'Feed', leaders: 'Leaders', chats: 'Chats', trends: 'Trends',
+    profitSort: '📈 Profitable', endingSort: '⏱ Ending soon', feed: 'Explore', leaders: 'Leaders', chats: 'Chats', trends: 'Trends',
     chatDms: '💬 DMs', chatTopics: '🗂 Topics', newIdea: 'New Idea 💡', title: 'Title', description: 'Description',
     minBet: 'Min. bet (SPK)', targetOpt: 'Target (optional)', duration: 'Duration', holdPublish: 'Hold to Publish',
     holdInvest: 'Hold to Invest', holdHint: 'Hold 2 seconds to confirm', investModal: 'Invest 🚀', yourBalance: 'Your balance',
