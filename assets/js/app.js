@@ -762,13 +762,13 @@ function profileHTML(sfx) {
     + '<span class="lang-cur" id="lc' + sfx + '">' + LANG.toUpperCase() + '</span>'
     + '<div class="lang-dd" id="ldd-' + sfx + '">'
     + '<div class="lang-opt' + (LANG === 'en' ? ' sel' : '') + '" data-lang="en" data-set-lang="en"><span style="font-size:11px; font-weight:bold; color:var(--mu);">EN</span> English</div>'
-    + '<div class="lang-opt' + (LANG === 'ru' ? ' sel' : '') + '" data-lang="ru" data-set-lang="ru"><span style="font-size:11px; font-weight:bold; color:var(--mu);">RU</span> Р СѓСЃСЃРєРёР№</div>'
+    + '<div class="lang-opt' + (LANG === 'ru' ? ' sel' : '') + '" data-lang="ru" data-set-lang="ru"><span style="font-size:11px; font-weight:bold; color:var(--mu);">RU</span> Русский</div>'
     + '</div></div>'
     + '<div class="sset" data-pulse="1" data-settings="notifications"><span>' + T('notifications') + '</span>'
     + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--mu)"><polyline points="9 18 15 12 9 6"/></svg></div>'
     + '<div class="sset" data-pulse="1" data-settings="privacy"><span>' + T('privacy') + '</span>'
     + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--mu)"><polyline points="9 18 15 12 9 6"/></svg></div>'
-    + '<a class="sset" href="about.html" style="text-decoration:none;color:inherit"><span>' + (typeof T === 'function' && T('aboutUs') !== 'aboutUs' ? T('aboutUs') : (window.LANG === 'ru' ? 'Рћ РЅР°СЃ' : 'About us')) + '</span>'
+    + '<a class="sset" href="about.html" style="text-decoration:none;color:inherit"><span>' + (typeof T === 'function' && T('aboutUs') !== 'aboutUs' ? T('aboutUs') : (window.LANG === 'ru' ? 'О нас' : 'About us')) + '</span>'
     + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--mu)"><polyline points="9 18 15 12 9 6"/></svg></a>'
     + '<div class="sset" data-logout="1"><span style="color:var(--red)">' + T('logout') + '</span>'
     + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--red)"><polyline points="9 18 15 12 9 6"/></svg></div>'
@@ -924,7 +924,7 @@ function reactHTML(id) {
 }
 
 function cardHTML(x) {
-  var fire = (getRS(x.id).counts['рџ”Ґ'] || 0) >= FIRE_T;
+  var fire = (getRS(x.id).counts['🔥'] || 0) >= FIRE_T;
   var safeUser = escapeHTML(x.u);
   var safeTag = escapeHTML(x.tag);
   var safeTitle = escapeHTML(x.title);
@@ -1015,7 +1015,7 @@ function react(ideaId, emoji, btn) {
     });
   });
   var card = document.querySelector('.card[data-cid="' + ideaId + '"]');
-  if (card) card.classList.toggle('fire', (rs.counts['рџ”Ґ'] || 0) >= FIRE_T);
+  if (card) card.classList.toggle('fire', (rs.counts['🔥'] || 0) >= FIRE_T);
 }
 
 var CUR_IDEA = null;
@@ -1606,7 +1606,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('confirm-step-password').classList.add('modal-step-hidden');
         document.getElementById('confirm-step-code').classList.remove('modal-step-hidden');
       } catch (err) {
-        toast(T('pwdErr') + ': ' + (err.message || ''), 'var(--red)');
+        toast(T('delErr') + ': ' + (err.message || ''), 'var(--red)');
       }
       btn.disabled = false;
       btn.textContent = 'Выслать код подтверждения';

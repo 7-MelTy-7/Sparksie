@@ -205,7 +205,8 @@ var I18N = {
     pwdUpdated: 'Password successfully updated',
     pwdErr: 'Error updating password',
     delCodeSent: 'Verification code for deletion sent to your email',
-    delSuccess: 'Account permanently deleted'
+    delSuccess: 'Account permanently deleted',
+    delErr: 'Error during account deletion'
   },
   ru: {
     iot: 'Интерес орбиты', cinv: 'инвесторов', cpool: 'пул', cleft: 'осталось', binv: 'Вложить', bcrit: 'Критика', noResults: 'Идеи не найдены',
@@ -258,7 +259,8 @@ var I18N = {
     pwdUpdated: 'Пароль успешно обновлен',
     pwdErr: 'Ошибка обновления пароля',
     delCodeSent: 'Код для удаления отправлен на вашу почту',
-    delSuccess: 'Аккаунт безвозвратно удален'
+    delSuccess: 'Аккаунт безвозвратно удален',
+    delErr: 'Ошибка удаления аккаунта'
   }
 };
 var LANG = localStorage.getItem('spark_lang') || 'ru';

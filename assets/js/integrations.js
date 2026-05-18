@@ -96,12 +96,17 @@ async function callEdgeFunction(name, body) {
     return { ok: false, error: new Error('supabase_unavailable') };
   }
   var url = SUPABASE_URL.replace(/\/$/, '') + '/functions/v1/' + name;
+  var token = SUPABASE_ANON_KEY;
+  try {
+    var { data: { session } } = await supa.auth.getSession();
+    if (session && session.access_token) token = session.access_token;
+  } catch (e) {}
   try {
     var res = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + SUPABASE_ANON_KEY,
+        Authorization: 'Bearer ' + token,
         apikey: SUPABASE_ANON_KEY
       },
       body: JSON.stringify(body || {})
