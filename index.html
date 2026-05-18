@@ -389,6 +389,101 @@
   </div>
 </div>
 
+<!-- МОДАЛКА УВЕДОМЛЕНИЙ -->
+<div class="mo" id="moNotifications">
+  <div class="mo-box spark-settings-page" style="padding:24px 20px; box-sizing:border-box;">
+    <div class="mo-handle"></div>
+    <div class="settings-header">
+      <h2 class="settings-title" id="notifTitle">УВЕДОМЛЕНИЯ</h2>
+      <p class="settings-subtitle" id="notifSub">Настройте частоту сигналов обновления терминала.</p>
+    </div>
+    <div class="settings-list">
+      <div class="settings-item">
+        <div class="item-info">
+          <h3 class="item-label" id="notifVibTitle">Вибрация терминала</h3>
+          <p class="item-description" id="notifVibSub">Вибрационные отклики терминала при кликах и переходах.</p>
+        </div>
+        <div class="item-action">
+          <label class="spark-toggle">
+            <input type="checkbox" id="toggle-vibration" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+      <div class="settings-item">
+        <div class="item-info">
+          <h3 class="item-label" id="notifEmailTitle">Важные анонсы</h3>
+          <p class="item-description" id="notifEmailSub">Письма о ключевых обновлениях платформы на привязанный email.</p>
+        </div>
+        <div class="item-action">
+          <label class="spark-toggle">
+            <input type="checkbox" id="toggle-email">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- МОДАЛКА ПРИВАТНОСТИ -->
+<div class="mo" id="moPrivacy">
+  <div class="mo-box spark-settings-page" style="padding:24px 20px; box-sizing:border-box;">
+    <div class="mo-handle"></div>
+    <div class="settings-header">
+      <h2 class="settings-title" id="privTitle" style="color:#EFBF04">ПРИВАТНОСТЬ</h2>
+      <p class="settings-subtitle" id="privSub">Управление доступом к вашему терминалу и конфигурация безопасности профиля.</p>
+    </div>
+    <div class="settings-list">
+      <div class="settings-item privacy-item-vertical">
+        <div class="item-info">
+          <h3 class="item-label" id="privSecTitle">Безопасность</h3>
+          <p class="item-description" id="privSecSub">Обновление ключа доступа (пароля) к вашей системе.</p>
+        </div>
+        <form class="privacy-password-form" id="privacy-form-password">
+          <div class="input-group">
+            <input type="password" id="current-password" placeholder="Текущий пароль" required class="spark-input">
+            <input type="password" id="new-password" placeholder="Новый пароль" required class="spark-input">
+          </div>
+          <button type="submit" class="spark-btn-submit" id="btnUpdatePwd">Обновить пароль</button>
+        </form>
+      </div>
+      <div class="settings-item" style="border-bottom:none;">
+        <div class="item-info">
+          <h3 class="item-label danger-title" id="privDelTitle">Удаление терминала</h3>
+          <p class="item-description" id="privDelSub">Полное удаление профиля. Все ваши искры будут безвозвратно поглощены черной дырой.</p>
+        </div>
+        <div class="item-action">
+          <button type="button" class="spark-btn-danger" id="btn-open-delete-modal">Стереть аккаунт</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- МОДАЛКА УДАЛЕНИЯ АККАУНТА -->
+<div class="spark-modal-overlay" id="delete-modal">
+  <div class="spark-modal-box">
+    <button class="modal-close-btn" id="modal-close-x">&times;</button>
+    <div class="modal-step" id="confirm-step-password">
+      <h3 class="modal-title danger-title" id="delModalTitle1">КРИТИЧЕСКОЕ ДЕЙСТВИЕ</h3>
+      <p class="modal-text" id="delModalSub1">Для запуска процедуры ликвидации терминала введите ваш текущий пароль. На вашу почту будет отправлен секретный код подтверждения.</p>
+      <form class="modal-form" id="form-delete-pwd">
+        <input type="password" id="delete-curr-pwd" placeholder="Текущий пароль" required class="spark-input modal-input">
+        <button type="submit" class="spark-btn-danger modal-btn" id="btnSendDelCode">Выслать код подтверждения</button>
+      </form>
+    </div>
+    <div class="modal-step modal-step-hidden" id="confirm-step-code">
+      <h3 class="modal-title gold-title" id="delModalTitle2">ПОДТВЕРЖДЕНИЕ С ОРБИТЫ</h3>
+      <p class="modal-text" id="delModalSub2">Система отправила письмо с 6-значным кодом на ваш email. Введите его для окончательного стирания данных. Если не можете найти ключ, посмотрите в папке «спам»</p>
+      <form class="modal-form" id="form-delete-code">
+        <input type="text" id="delete-verify-code" placeholder="000 000" maxlength="6" required class="spark-input modal-input code-input">
+        <button type="submit" class="spark-btn-danger modal-btn final-delete-btn" id="btnConfirmDel">Окончательно стереть систему</button>
+      </form>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <!-- Настройка: скопируйте assets/js/config.example.js → assets/js/config.js -->

@@ -201,7 +201,11 @@ var I18N = {
     reg_err_invalid: 'Check email format, password (8+ chars), and nickname (1–30 characters).',
     reg_err_rate_limit: 'Too many attempts. Please wait 15 minutes.',
     configSetup: 'Supabase is not configured. Copy assets/js/config.example.js to config.js and set your project URL and anon key.',
-    aboutUs: 'About Us'
+    aboutUs: 'About Us',
+    pwdUpdated: 'Password successfully updated',
+    pwdErr: 'Error updating password',
+    delCodeSent: 'Verification code for deletion sent to your email',
+    delSuccess: 'Account permanently deleted'
   },
   ru: {
     iot: 'Интерес орбиты', cinv: 'инвесторов', cpool: 'пул', cleft: 'осталось', binv: 'Вложить', bcrit: 'Критика', noResults: 'Идеи не найдены',
@@ -250,7 +254,11 @@ var I18N = {
     reg_err_invalid: 'Проверьте почту, пароль (от 8 символов) и ник (1–30 символов).',
     reg_err_rate_limit: 'Слишком много попыток. Пожалуйста, подождите 15 минут.',
     configSetup: 'Supabase не настроен. Скопируйте assets/js/config.example.js в config.js и укажите URL проекта и anon-ключ.',
-    aboutUs: 'О нас'
+    aboutUs: 'О нас',
+    pwdUpdated: 'Пароль успешно обновлен',
+    pwdErr: 'Ошибка обновления пароля',
+    delCodeSent: 'Код для удаления отправлен на вашу почту',
+    delSuccess: 'Аккаунт безвозвратно удален'
   }
 };
 var LANG = localStorage.getItem('spark_lang') || 'ru';

@@ -124,6 +124,8 @@ document.addEventListener('DOMContentLoaded', function () {
       var pulseBtn = event.target.closest('[data-pulse]');
       if (pulseBtn) {
         pulse(pulseBtn);
+        if (pulseBtn.dataset.settings === 'notifications') showNotifications();
+        if (pulseBtn.dataset.settings === 'privacy') showPrivacy();
         return;
       }
       var logoutBtn = event.target.closest('[data-logout]');
@@ -760,9 +762,9 @@ function profileHTML(sfx) {
     + '<div class="lang-opt' + (LANG === 'en' ? ' sel' : '') + '" data-lang="en" data-set-lang="en"><span style="font-size:11px; font-weight:bold; color:var(--mu);">EN</span> English</div>'
     + '<div class="lang-opt' + (LANG === 'ru' ? ' sel' : '') + '" data-lang="ru" data-set-lang="ru"><span style="font-size:11px; font-weight:bold; color:var(--mu);">RU</span> Р СѓСЃСЃРєРёР№</div>'
     + '</div></div>'
-    + '<div class="sset" data-pulse="1"><span>' + T('notifications') + '</span>'
+    + '<div class="sset" data-pulse="1" data-settings="notifications"><span>' + T('notifications') + '</span>'
     + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--mu)"><polyline points="9 18 15 12 9 6"/></svg></div>'
-    + '<div class="sset" data-pulse="1"><span>' + T('privacy') + '</span>'
+    + '<div class="sset" data-pulse="1" data-settings="privacy"><span>' + T('privacy') + '</span>'
     + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--mu)"><polyline points="9 18 15 12 9 6"/></svg></div>'
     + '<a class="sset" href="about.html" style="text-decoration:none;color:inherit"><span>' + (typeof T === 'function' && T('aboutUs') !== 'aboutUs' ? T('aboutUs') : (window.LANG === 'ru' ? 'Рћ РЅР°СЃ' : 'About us')) + '</span>'
     + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--mu)"><polyline points="9 18 15 12 9 6"/></svg></a>'
@@ -1454,3 +1456,178 @@ window.addEventListener('unhandledrejection', function (event) {
     message: reason && reason.message ? reason.message : String(reason)
   });
 });
+
+/* --- SPARK SETTINGS & PRIVACY INJECTION --- */
+document.addEventListener('DOMContentLoaded', function() {
+  var moNotif = document.getElementById('moNotifications');
+  if (moNotif) {
+    moNotif.addEventListener('click', function (event) {
+      if (event.target === moNotif) closeMo('moNotifications');
+    });
+  }
+  var moPriv = document.getElementById('moPrivacy');
+  if (moPriv) {
+    moPriv.addEventListener('click', function (event) {
+      if (event.target === moPriv) closeMo('moPrivacy');
+    });
+  }
+
+  var moDel = document.getElementById('delete-modal');
+  if (moDel) {
+    moDel.addEventListener('click', function (event) {
+      if (event.target === moDel) moDel.classList.remove('active');
+    });
+  }
+  
+  var delClose = document.getElementById('modal-close-x');
+  if (delClose) {
+    delClose.addEventListener('click', function() {
+      if (moDel) moDel.classList.remove('active');
+    });
+  }
+  
+  var togVib = document.getElementById('toggle-vibration');
+  if (togVib) {
+    togVib.addEventListener('change', async function() {
+      if (!ME) return;
+      var val = togVib.checked;
+      if (val && navigator.vibrate) navigator.vibrate(50);
+      try {
+        await supa.auth.updateUser({ data: { prefs_vibration: val } });
+        var { data: { user } } = await supa.auth.getUser();
+        if (user) ME = user;
+      } catch (e) {}
+    });
+  }
+  
+  var togEm = document.getElementById('toggle-email');
+  if (togEm) {
+    togEm.addEventListener('change', async function() {
+      if (!ME) return;
+      var val = togEm.checked;
+      try {
+        await supa.auth.updateUser({ data: { prefs_email: val } });
+        var { data: { user } } = await supa.auth.getUser();
+        if (user) ME = user;
+      } catch (e) {}
+    });
+  }
+
+  var pwdForm = document.getElementById('privacy-form-password');
+  if (pwdForm) {
+    pwdForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      if (!ME) return;
+      var btn = document.getElementById('btnUpdatePwd');
+      var currPwd = document.getElementById('current-password').value;
+      var newPwd = document.getElementById('new-password').value;
+      
+      btn.disabled = true;
+      btn.textContent = '...';
+      try {
+        var { error: verifyErr } = await supa.auth.signInWithPassword({
+          email: ME.email,
+          password: currPwd
+        });
+        if (verifyErr) throw verifyErr;
+        
+        var { error: updErr } = await supa.auth.updateUser({ password: newPwd });
+        if (updErr) throw updErr;
+        
+        toast(T('pwdUpdated'), 'var(--ac2)');
+        pwdForm.reset();
+      } catch (err) {
+        toast(T('pwdErr') + ': ' + (err.message || ''), 'var(--red)');
+      }
+      btn.disabled = false;
+      btn.textContent = 'Обновить пароль';
+    });
+  }
+
+  var btnOpenDel = document.getElementById('btn-open-delete-modal');
+  if (btnOpenDel) {
+    btnOpenDel.addEventListener('click', function() {
+      closeMo('moPrivacy');
+      var moDel = document.getElementById('delete-modal');
+      if (moDel) {
+        document.getElementById('confirm-step-password').classList.remove('modal-step-hidden');
+        document.getElementById('confirm-step-code').classList.add('modal-step-hidden');
+        document.getElementById('form-delete-pwd').reset();
+        document.getElementById('form-delete-code').reset();
+        moDel.classList.add('active');
+      }
+    });
+  }
+
+  var formDelPwd = document.getElementById('form-delete-pwd');
+  if (formDelPwd) {
+    formDelPwd.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      if (!ME) return;
+      var btn = document.getElementById('btnSendDelCode');
+      var currPwd = document.getElementById('delete-curr-pwd').value;
+      
+      btn.disabled = true;
+      btn.textContent = '...';
+      try {
+        var { error: verifyErr } = await supa.auth.signInWithPassword({
+          email: ME.email,
+          password: currPwd
+        });
+        if (verifyErr) throw verifyErr;
+        
+        var r = await callEdgeFunction('privacy-send-delete-code', {});
+        if (!r.ok) throw new Error(r.error || 'Failed');
+        
+        toast(T('delCodeSent'), 'var(--ac2)');
+        document.getElementById('confirm-step-password').classList.add('modal-step-hidden');
+        document.getElementById('confirm-step-code').classList.remove('modal-step-hidden');
+      } catch (err) {
+        toast(T('pwdErr') + ': ' + (err.message || ''), 'var(--red)');
+      }
+      btn.disabled = false;
+      btn.textContent = 'Выслать код подтверждения';
+    });
+  }
+
+  var formDelCode = document.getElementById('form-delete-code');
+  if (formDelCode) {
+    formDelCode.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      if (!ME) return;
+      var btn = document.getElementById('btnConfirmDel');
+      var code = document.getElementById('delete-verify-code').value;
+      
+      btn.disabled = true;
+      btn.textContent = '...';
+      try {
+        var r = await callEdgeFunction('privacy-delete-account', { code: code });
+        if (!r.ok) throw new Error(r.error || 'Failed');
+        
+        toast(T('delSuccess'), 'var(--ac2)');
+        var moDel = document.getElementById('delete-modal');
+        if (moDel) moDel.classList.remove('active');
+        doLogout();
+      } catch (err) {
+        toast(T('regInvalidCode') + ': ' + (err.message || ''), 'var(--red)');
+        btn.disabled = false;
+        btn.textContent = 'Окончательно стереть систему';
+      }
+    });
+  }
+});
+
+window.showNotifications = function() {
+  var prefs = ME && ME.user_metadata ? ME.user_metadata : {};
+  var togVib = document.getElementById('toggle-vibration');
+  if (togVib) togVib.checked = prefs.prefs_vibration !== false;
+  var togEm = document.getElementById('toggle-email');
+  if (togEm) togEm.checked = prefs.prefs_email === true;
+  openMo('moNotifications');
+};
+
+window.showPrivacy = function() {
+  var pwdForm = document.getElementById('privacy-form-password');
+  if (pwdForm) pwdForm.reset();
+  openMo('moPrivacy');
+};
