@@ -457,7 +457,7 @@ function setVmErr(m) {
 
 async function checkEmailVerified() {
   var btn = document.getElementById('vmConfirmBtn');
-  if (btn) { btn.disabled = true; btn.textContent = 'РџСЂРѕРІРµСЂСЏРµРјвЂ¦'; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Проверяем…'; }
   setVmErr('');
 
   if (!supa) { hideVerify(); enterApp(); return; }
@@ -479,9 +479,9 @@ async function checkEmailVerified() {
       }
     }
   } catch (e) {
-    setVmErr('РћС€РёР±РєР° СЃРµС‚Рё. РџРѕРїСЂРѕР±СѓР№С‚Рµ РµС‰С‘ СЂР°Р·.');
+    setVmErr('Ошибка сети. Попробуйте ещё раз.');
     console.warn('checkEmailVerified error', e);
-    if (btn) { btn.disabled = false; btn.textContent = 'вњ… РЇ РїРѕРґС‚РІРµСЂРґРёР»(Р°)'; }
+    if (btn) { btn.disabled = false; btn.textContent = T('verifyDone'); }
     return;
   }
 
@@ -490,8 +490,8 @@ async function checkEmailVerified() {
     hideVerify();
     enterApp();
   } else {
-    setVmErr('РџРѕС‡С‚Р° РµС‰С‘ РЅРµ РїРѕРґС‚РІРµСЂР¶РґРµРЅР°. РџСЂРѕРІРµСЂСЊС‚Рµ РїР°РїРєСѓ В«РЎРїР°РјВ».');
-    if (btn) { btn.disabled = false; btn.textContent = 'вњ… РЇ РїРѕРґС‚РІРµСЂРґРёР»(Р°)'; }
+    setVmErr('Почта ещё не подтверждена. Проверьте папку «Спам».');
+    if (btn) { btn.disabled = false; btn.textContent = T('verifyDone'); }
   }
 }
 
@@ -504,9 +504,9 @@ async function resendVerification() {
       email: PENDING_EMAIL,
       options: { emailRedirectTo: window.location.origin + window.location.pathname }
     });
-    setVmErr(r.error ? 'РќРµ СѓРґР°Р»РѕСЃСЊ: ' + r.error.message : 'вњ‰пёЏ РџРёСЃСЊРјРѕ РѕС‚РїСЂР°РІР»РµРЅРѕ!');
+    setVmErr(r.error ? 'Не удалось: ' + r.error.message : '✉️ Письмо отправлено!');
   } catch (e) {
-    setVmErr('РћС€РёР±РєР° РѕС‚РїСЂР°РІРєРё.');
+    setVmErr('Ошибка отправки.');
   }
 }
 
@@ -590,7 +590,7 @@ function applyStaticI18n() {
   setText('.frow [data-sort="ending"]', T('endingSort'));
   setText('.trow .flabel', T('tagLabel'));
   setText('.trow [data-tag="all"]', T('all'));
-  setPlaceholder('#srchIn', LANG === 'ru' ? 'РџРѕРёСЃРє РёРґРµР№...' : 'Search ideas...');
+  setPlaceholder('#srchIn', LANG === 'ru' ? 'Поиск идей...' : 'Search ideas...');
 
   setText('.mob-tab[data-panel="feed"] span', T('feed'));
   setText('.mob-tab[data-panel="leaders"] span', T('leaders'));
@@ -610,13 +610,42 @@ function applyStaticI18n() {
   setText('#moCreate .mf:nth-of-type(3) label', T('duration'));
   setText('#btnPub', T('holdPublish'));
   setText('#moCreate .hbtn-hint', T('holdHint'));
-  setPlaceholder('#ciTitle', LANG === 'ru' ? 'Р’ С‡РµРј РёРґРµСЏ?' : "What's the idea?");
-  setPlaceholder('#ciDesc', LANG === 'ru' ? 'РћРїРёС€РёС‚Рµ...' : 'Describe it...');
+  setPlaceholder('#ciTitle', LANG === 'ru' ? 'В чем идея?' : "What's the idea?");
+  setPlaceholder('#ciDesc', LANG === 'ru' ? 'Опишите...' : 'Describe it...');
 
   setText('#invTitle', T('investModal'));
   setText('#moInvest .inv-bal span', T('yourBalance'));
   setText('#btnInv', T('holdInvest'));
   setText('#moInvest .hbtn-hint', T('holdHint'));
+
+  // Notifications modal i18n
+  setText('#notifTitle', T('notifTitle'));
+  setText('#notifSub', T('notifSub'));
+  setText('#notifVibTitle', T('notifVibTitle'));
+  setText('#notifVibSub', T('notifVibSub'));
+  setText('#notifEmailTitle', T('notifEmailTitle'));
+  setText('#notifEmailSub', T('notifEmailSub'));
+
+  // Privacy modal i18n
+  setText('#privTitle', T('privTitle'));
+  setText('#privSub', T('privSub'));
+  setText('#privSecTitle', T('privSecTitle'));
+  setText('#privSecSub', T('privSecSub'));
+  setPlaceholder('#current-password', T('privCurrPwd'));
+  setPlaceholder('#new-password', T('privNewPwd'));
+  setText('#btnUpdatePwd', T('privUpdatePwd'));
+  setText('#privDelTitle', T('privDelTitle'));
+  setText('#privDelSub', T('privDelSub'));
+  setText('#btn-open-delete-modal', T('privDelBtn'));
+
+  // Delete account modal i18n
+  setText('#delModalTitle1', T('delModal1Title'));
+  setText('#delModalSub1', T('delModal1Sub'));
+  setPlaceholder('#delete-curr-pwd', T('delModal1Pwd'));
+  setText('#btnSendDelCode', T('delSendCode'));
+  setText('#delModalTitle2', T('delModal2Title'));
+  setText('#delModalSub2', T('delModal2Sub'));
+  setText('#btnConfirmDel', T('delFinalBtn'));
 }
 
 function initObservatory() {
@@ -663,7 +692,7 @@ function shortTopic(idea) {
   if (!idea) return 'N/A';
   var source = String(idea.title || idea.tag || '').trim();
   if (!source) return 'N/A';
-  return source.length > 14 ? source.slice(0, 14) + 'вЂ¦' : source;
+  return source.length > 14 ? source.slice(0, 14) + '…' : source;
 }
 
 function topByCategory(tags, maxItems) {
@@ -708,17 +737,17 @@ function applyLiveActivityI18n() {
   var row3 = document.getElementById('actRow3');
   if (row1) {
     row1.innerHTML = LANG === 'ru'
-      ? '<span style="color:var(--ac2)">@sarah_angel</span> РІР»РѕР¶РёР»(Р°) <strong style="color:var(--tx)">50 SPK</strong> РІ AI code review<div style="font-size:10px;margin-top:1px">2 РјРёРЅ РЅР°Р·Р°Рґ</div>'
+      ? '<span style="color:var(--ac2)">@sarah_angel</span> вложил(а) <strong style="color:var(--tx)">50 SPK</strong> в AI code review<div style="font-size:10px;margin-top:1px">2 мин назад</div>'
       : '<span style="color:var(--ac2)">@sarah_angel</span> invested <strong style="color:var(--tx)">50 SPK</strong> in AI code review<div style="font-size:10px;margin-top:1px">2 min ago</div>';
   }
   if (row2) {
     row2.innerHTML = LANG === 'ru'
-      ? '<span style="color:var(--red)">@dima_builds</span> СЂР°СЃРєСЂРёС‚РёРєРѕРІР°Р»(Р°) Solar Leasing<div style="font-size:10px;margin-top:1px">7 РјРёРЅ РЅР°Р·Р°Рґ</div>'
+      ? '<span style="color:var(--red)">@dima_builds</span> раскритиковал(а) Solar Leasing<div style="font-size:10px;margin-top:1px">7 мин назад</div>'
       : '<span style="color:var(--red)">@dima_builds</span> critiqued Solar Leasing<div style="font-size:10px;margin-top:1px">7 min ago</div>';
   }
   if (row3) {
     row3.innerHTML = LANG === 'ru'
-      ? 'РћРїСѓР±Р»РёРєРѕРІР°РЅР° РЅРѕРІР°СЏ РёРґРµСЏ: <strong style="color:var(--tx)">#DeFi lending for SMEs</strong><div style="font-size:10px;margin-top:1px">12 РјРёРЅ РЅР°Р·Р°Рґ</div>'
+      ? 'Опубликована новая идея: <strong style="color:var(--tx)">#DeFi lending for SMEs</strong><div style="font-size:10px;margin-top:1px">12 мин назад</div>'
       : 'New idea posted: <strong style="color:var(--tx)">#DeFi lending for SMEs</strong><div style="font-size:10px;margin-top:1px">12 min ago</div>';
   }
 }
@@ -934,7 +963,7 @@ function cardHTML(x) {
   var safeAv = safeAvatar(x.av);
   return '<div class="card' + (fire ? ' fire' : '') + '" data-cid="' + x.id + '">'
     + '<div class="ch"><div class="cav" style="background:' + safeBg + '">' + safeAv + '</div>'
-    + '<div class="cm"><div class="cu">' + safeUser + '</div><div class="ct">' + safeTime + ' В· #' + safeTag + '</div></div>'
+    + '<div class="cm"><div class="cu">' + safeUser + '</div><div class="ct">' + safeTime + ' · #' + safeTag + '</div></div>'
     + '<div class="cmen"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></div></div>'
     + '<div class="ctitle">' + safeTitle + '</div><div class="cbody">' + safeBody + '</div>'
     + investGraphHTML(x)
@@ -967,18 +996,18 @@ function renderPgn(tp) {
   var ps = [];
   if (tp <= 5) { for (var i = 1; i <= tp; i++) ps.push(i); } else {
     var l = Math.max(1, page - 1), r = Math.min(tp, page + 1);
-    if (l > 2) ps.push('вЂ¦l');
+    if (l > 2) ps.push('…l');
     for (var p2 = l; p2 <= r; p2++) ps.push(p2);
-    if (r < tp - 1) ps.push('вЂ¦r');
+    if (r < tp - 1) ps.push('…r');
   }
-  var h = mkbtn('В«', 1, page === 1, false) + mkbtn('вЂ№', page - 1, page === 1, false);
-  if (!ps.includes(1)) { h += mkbtn('1', 1, false, false); if (ps[0] !== 'вЂ¦l') h += '<span class="psep">вЂ¦</span>'; }
+  var h = mkbtn('«', 1, page === 1, false) + mkbtn('‹', page - 1, page === 1, false);
+  if (!ps.includes(1)) { h += mkbtn('1', 1, false, false); if (ps[0] !== '…l') h += '<span class="psep">…</span>'; }
   ps.forEach(function (p) {
-    if (p === 'вЂ¦l' || p === 'вЂ¦r') h += '<span class="psep">вЂ¦</span>';
+    if (p === '…l' || p === '…r') h += '<span class="psep">…</span>';
     else h += mkbtn(p, p, false, p === page);
   });
-  if (!ps.includes(tp)) { if (ps[ps.length - 1] !== 'вЂ¦r') h += '<span class="psep">вЂ¦</span>'; h += mkbtn(tp, tp, false, false); }
-  h += mkbtn('вЂє', page + 1, page === tp, false) + mkbtn('В»', tp, page === tp, false);
+  if (!ps.includes(tp)) { if (ps[ps.length - 1] !== '…r') h += '<span class="psep">…</span>'; h += mkbtn(tp, tp, false, false); }
+  h += mkbtn('›', page + 1, page === tp, false) + mkbtn('»', tp, page === tp, false);
   pg.innerHTML = h;
   pg.querySelectorAll('.pbtn:not([disabled])').forEach(function (b) {
     b.addEventListener('click', function () { page = parseInt(b.dataset.p, 10); renderFeed(); });
@@ -1032,8 +1061,8 @@ function openInvest(id) {
   var maxAllowed = Math.max(min, PROFILE.spk_balance);
   var invTitle = document.getElementById('invTitle');
   if (invTitle) {
-    var titlePrefix = LANG === 'ru' ? 'РРЅРІРµСЃС‚РёСЂРѕРІР°С‚СЊ РІ "' : 'Invest in "';
-    invTitle.textContent = titlePrefix + String(idea.title || '').slice(0, 28) + 'вЂ¦" рџљЂ';
+    var titlePrefix = LANG === 'ru' ? 'Инвестировать в "' : 'Invest in "';
+    invTitle.textContent = titlePrefix + String(idea.title || '').slice(0, 28) + '…" 🚀';
   }
   var invBal = document.getElementById('invBal');
   if (invBal) invBal.textContent = PROFILE.spk_balance.toLocaleString() + ' SPK';
@@ -1563,7 +1592,7 @@ document.addEventListener('DOMContentLoaded', function() {
         toast(T('pwdErr') + ': ' + (err.message || ''), 'var(--red)');
       }
       btn.disabled = false;
-      btn.textContent = 'Обновить пароль';
+      btn.textContent = T('privUpdatePwd');
     });
   }
 
@@ -1609,7 +1638,7 @@ document.addEventListener('DOMContentLoaded', function() {
         toast(T('delErr') + ': ' + (err.message || ''), 'var(--red)');
       }
       btn.disabled = false;
-      btn.textContent = 'Выслать код подтверждения';
+      btn.textContent = T('delSendCode');
     });
   }
 
@@ -1634,7 +1663,7 @@ document.addEventListener('DOMContentLoaded', function() {
       } catch (err) {
         toast(T('regInvalidCode') + ': ' + (err.message || ''), 'var(--red)');
         btn.disabled = false;
-        btn.textContent = 'Окончательно стереть систему';
+        btn.textContent = T('delFinalBtn');
       }
     });
   }

@@ -1,89 +1,199 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.42.0';
-import { SmtpClient } from 'https://deno.land/x/smtp@v0.7.0/mod.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
 
-const corsHeaders = {
+const cors = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-function json(data: any, status = 200) {
-  return new Response(JSON.stringify(data), {
+function json(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    headers: { ...cors, 'Content-Type': 'application/json' },
   });
 }
 
-serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+function deleteEmailHtml(code: string) {
+  return `
+    <div style="font-family:sans-serif;max-width:480px;margin:0 auto;background:#0d1118;color:#e8e8f0;padding:32px;border-radius:12px;border:1px solid #2a2a3a;">
+      <h2 style="color:#e25c5c;letter-spacing:2px;margin:0 0 16px">⚠️ КРИТИЧЕСКОЕ ДЕЙСТВИЕ</h2>
+      <p style="color:#a0a0b0;margin:0 0 12px">Вы запросили <strong style="color:#e8e8f0">удаление аккаунта</strong> на платформе SPARK.</p>
+      <p style="color:#a0a0b0;margin:0 0 20px">Ваш код подтверждения:</p>
+      <div style="background:#1a1a2e;border:1px solid #e25c5c;border-radius:8px;padding:20px;text-align:center;margin-bottom:20px;">
+        <span style="font-size:32px;font-weight:700;letter-spacing:8px;color:#e25c5c;">${code}</span>
+      </div>
+      <p style="color:#626270;font-size:13px;margin:0">Код действителен 15 минут. Если это были не вы — срочно смените пароль в настройках приватности.</p>
+    </div>`;
+}
+
+const DELETE_EMAIL_SUBJECT = 'Код подтверждения удаления аккаунта SPARK';
+
+function parseFromAddress(raw: string): { name: string; email: string } {
+  const match = raw.trim().match(/^(.+?)\s*<([^>]+)>$/);
+  if (match) return { name: match[1].trim(), email: match[2].trim() };
+  return { name: 'SPARK', email: raw.trim() };
+}
+
+async function sendViaResend(to: string, code: string): Promise<boolean> {
+  const apiKey = Deno.env.get('RESEND_API_KEY');
+  if (!apiKey) return false;
+
+  const from = Deno.env.get('RESEND_FROM_EMAIL') || 'SPARK <onboarding@resend.dev>';
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from, to: [to], subject: DELETE_EMAIL_SUBJECT, html: deleteEmailHtml(code) }),
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    console.error('[privacy-send-delete-code] Resend error', res.status, err);
+    throw new Error('email_delivery_failed');
+  }
+  return true;
+}
+
+async function sendViaBrevo(to: string, code: string): Promise<boolean> {
+  const apiKey = Deno.env.get('BREVO_API_KEY');
+  if (!apiKey) return false;
+
+  const fromRaw =
+    Deno.env.get('BREVO_FROM_EMAIL') ||
+    Deno.env.get('SMTP_FROM') ||
+    Deno.env.get('RESEND_FROM_EMAIL') ||
+    'SPARK <noreply@example.com>';
+  const from = parseFromAddress(fromRaw);
+
+  const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: { 'api-key': apiKey, 'Content-Type': 'application/json', accept: 'application/json' },
+    body: JSON.stringify({
+      sender: { name: from.name, email: from.email },
+      to: [{ email: to }],
+      subject: DELETE_EMAIL_SUBJECT,
+      htmlContent: deleteEmailHtml(code),
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    console.error('[privacy-send-delete-code] Brevo error', res.status, err);
+    throw new Error('email_delivery_failed');
+  }
+  return true;
+}
+
+function smtpConfigured(): boolean {
+  return Boolean(
+    Deno.env.get('SMTP_HOSTNAME') &&
+    Deno.env.get('SMTP_PORT') &&
+    Deno.env.get('SMTP_USERNAME') &&
+    Deno.env.get('SMTP_PASSWORD') &&
+    Deno.env.get('SMTP_FROM')
+  );
+}
+
+async function sendViaSmtp(to: string, code: string): Promise<boolean> {
+  if (!smtpConfigured()) return false;
+
+  // Use nodemailer via npm specifier (same as register-send-code)
+  const nodemailer = (await import('npm:nodemailer@6.9.10')).default;
+  const transport = nodemailer.createTransport({
+    host: Deno.env.get('SMTP_HOSTNAME')!,
+    port: Number(Deno.env.get('SMTP_PORT')),
+    secure: Deno.env.get('SMTP_SECURE') === 'true',
+    auth: {
+      user: Deno.env.get('SMTP_USERNAME')!,
+      pass: Deno.env.get('SMTP_PASSWORD')!,
+    },
+  });
+
+  await new Promise<void>((resolve, reject) => {
+    transport.sendMail(
+      { from: Deno.env.get('SMTP_FROM')!, to, subject: DELETE_EMAIL_SUBJECT, html: deleteEmailHtml(code) },
+      (error: Error | null) => { if (error) reject(error); else resolve(); }
+    );
+  });
+  return true;
+}
+
+async function sendDeleteCode(to: string, code: string): Promise<boolean> {
+  const hasResend = Boolean(Deno.env.get('RESEND_API_KEY'));
+  const hasBrevo = Boolean(Deno.env.get('BREVO_API_KEY'));
+  const hasSmtp = smtpConfigured();
+
+  if (!hasResend && !hasBrevo && !hasSmtp) {
+    console.warn('[privacy-send-delete-code] no email provider configured');
+    return false;
+  }
+
+  let lastError: unknown = null;
+
+  if (hasResend) {
+    try { if (await sendViaResend(to, code)) return true; } catch (e) { lastError = e; }
+  }
+  if (hasBrevo) {
+    try { if (await sendViaBrevo(to, code)) return true; } catch (e) { lastError = e; }
+  }
+  if (hasSmtp) {
+    try { if (await sendViaSmtp(to, code)) return true; } catch (e) { lastError = e; }
+  }
+
+  if (lastError) throw lastError;
+  return false;
+}
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
+  if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
+
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  if (!supabaseUrl || !serviceKey) return json({ error: 'Server configuration error' }, 500);
+
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader) return json({ error: 'Missing auth header' }, 401);
+
+  const admin = createClient(supabaseUrl, serviceKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+
+  const token = authHeader.replace('Bearer ', '');
+  const { data: { user }, error: authError } = await admin.auth.getUser(token);
+
+  if (authError || !user || !user.email) {
+    return json({ error: 'Invalid token or missing email' }, 401);
+  }
+
+  const email = user.email;
+
+  // Generate 6-digit code
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+
+  // Upsert pending deletion (replace any existing)
+  const { error: dbError } = await admin.from('pending_deletions').upsert({
+    email,
+    code,
+    attempts: 0,
+    expires_at: expiresAt,
+  });
+
+  if (dbError) {
+    console.error('[privacy-send-delete-code] DB error:', dbError.message);
+    return json({ error: 'Failed to create deletion request' }, 500);
+  }
 
   try {
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) return json({ error: 'Missing auth header' }, 401);
-
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
-    const admin = createClient(supabaseUrl, supabaseKey, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    });
-
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await admin.auth.getUser(token);
-    
-    if (authError || !user || !user.email) {
-      return json({ error: 'Invalid token or missing email' }, 401);
+    const sent = await sendDeleteCode(email, code);
+    if (!sent) {
+      const allowDev = Deno.env.get('ALLOW_DEV_REGISTRATION_CODES') === 'true';
+      if (allowDev) {
+        return json({ ok: true, message: 'Code created (no email provider)', dev_code: code });
+      }
+      return json({ error: 'Email delivery is not configured' }, 503);
     }
-
-    const email = user.email;
-
-    // Generate 6 digit code
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-
-    // Remove any existing pending deletions for this email
-    await admin.from('pending_deletions').delete().eq('email', email);
-
-    // Insert new pending deletion
-    const { error: dbError } = await admin.from('pending_deletions').insert({
-      email,
-      code,
-      attempts: 0
-    });
-
-    if (dbError) {
-      console.error('DB Error:', dbError);
-      return json({ error: 'Failed to create request' }, 500);
-    }
-
-    // Send email
-    const smtpClient = new SmtpClient();
-    await smtpClient.connectTLS({
-      hostname: Deno.env.get('SMTP_HOSTNAME') || '',
-      port: parseInt(Deno.env.get('SMTP_PORT') || '465', 10),
-      username: Deno.env.get('SMTP_USERNAME') || '',
-      password: Deno.env.get('SMTP_PASSWORD') || '',
-    });
-
-    const fromAddress = Deno.env.get('SMTP_FROM') || 'SPARK <noreply@spark.app>';
-    
-    await smtpClient.send({
-      from: fromAddress,
-      to: email,
-      subject: 'Код подтверждения для удаления аккаунта SPARK',
-      content: `Вы запросили удаление вашего терминала (аккаунта) в SPARK.\n\nВаш 6-значный код подтверждения: ${code}\n\nЕсли это были не вы, срочно обновите пароль в настройках приватности.`,
-      html: `<div style="font-family:sans-serif;color:#111;">
-               <h2 style="color:#e25c5c;">КРИТИЧЕСКОЕ ДЕЙСТВИЕ</h2>
-               <p>Вы запросили удаление вашего терминала (аккаунта) в SPARK.</p>
-               <p>Ваш секретный код подтверждения:</p>
-               <h3 style="font-size:24px;letter-spacing:4px;color:#e25c5c;">${code}</h3>
-               <p>Если это были не вы, срочно обновите пароль в настройках приватности!</p>
-             </div>`
-    });
-
-    await smtpClient.close();
-
-    return json({ ok: true, message: 'Code sent successfully' });
-  } catch (error: any) {
-    console.error('send code error', error);
-    return json({ error: 'Internal Server Error' }, 500);
+  } catch (e: any) {
+    console.error('[privacy-send-delete-code] send error:', e?.message || e);
+    return json({ error: 'Failed to send confirmation email' }, 503);
   }
+
+  return json({ ok: true, message: 'Confirmation code sent to your email' });
 });

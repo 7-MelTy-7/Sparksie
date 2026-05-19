@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS public.pending_deletions (
     email TEXT NOT NULL UNIQUE,
     code TEXT NOT NULL,
     attempts INTEGER DEFAULT 0,
+    expires_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
