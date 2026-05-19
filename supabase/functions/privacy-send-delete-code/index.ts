@@ -219,11 +219,11 @@ Deno.serve(async (req) => {
     code,
     attempts: 0,
     expires_at: expiresAt,
-  });
+  }, { onConflict: 'email' });
 
   if (dbError) {
     console.error('[privacy-send-delete-code] DB error:', dbError.message);
-    return json({ error: 'Failed to create deletion request' }, 500);
+    return json({ error: 'Failed to create deletion request. DB Error: ' + dbError.message }, 500);
   }
 
   try {
