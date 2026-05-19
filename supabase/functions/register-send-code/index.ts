@@ -1,5 +1,4 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
-import nodemailer from 'npm:nodemailer@6.9.10';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -95,25 +94,38 @@ async function sendViaResend(to: string, code: string): Promise<boolean> {
   if (!apiKey) return false;
 
   const from = Deno.env.get('RESEND_FROM_EMAIL') || 'SPARK <onboarding@resend.dev>';
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from,
-      to: [to],
-      subject: VERIFICATION_SUBJECT,
-      html: verificationEmailHtml(code),
-    }),
-  });
-  if (!res.ok) {
-    const errText = await res.text();
-    console.error('[register-send-code] Resend error', res.status, errText);
-    throw new Error('email_delivery_failed');
+  
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from,
+        to: [to],
+        subject: VERIFICATION_SUBJECT,
+        html: verificationEmailHtml(code),
+      }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error('[register-send-code] Resend error', res.status, errText);
+      throw new Error('email_delivery_failed');
+    }
+    return true;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
   }
-  return true;
 }
 
 async function sendViaBrevo(to: string, code: string): Promise<boolean> {
@@ -127,82 +139,48 @@ async function sendViaBrevo(to: string, code: string): Promise<boolean> {
     'SPARK <noreply@example.com>';
   const from = parseFromAddress(fromRaw);
 
-  const res = await fetch('https://api.brevo.com/v3/smtp/email', {
-    method: 'POST',
-    headers: {
-      'api-key': apiKey,
-      'Content-Type': 'application/json',
-      accept: 'application/json',
-    },
-    body: JSON.stringify({
-      sender: { name: from.name, email: from.email },
-      to: [{ email: to }],
-      subject: VERIFICATION_SUBJECT,
-      htmlContent: verificationEmailHtml(code),
-    }),
-  });
-  if (!res.ok) {
-    const errText = await res.text();
-    console.error('[register-send-code] Brevo error', res.status, errText);
-    throw new Error('email_delivery_failed');
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+  try {
+    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'api-key': apiKey,
+        'Content-Type': 'application/json',
+        accept: 'application/json',
+      },
+      body: JSON.stringify({
+        sender: { name: from.name, email: from.email },
+        to: [{ email: to }],
+        subject: VERIFICATION_SUBJECT,
+        htmlContent: verificationEmailHtml(code),
+      }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error('[register-send-code] Brevo error', res.status, errText);
+      throw new Error('email_delivery_failed');
+    }
+    return true;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
   }
-  return true;
 }
 
 function smtpConfigured(): boolean {
-  return Boolean(
-    Deno.env.get('SMTP_HOSTNAME') &&
-      Deno.env.get('SMTP_PORT') &&
-      Deno.env.get('SMTP_USERNAME') &&
-      Deno.env.get('SMTP_PASSWORD') &&
-      Deno.env.get('SMTP_FROM')
-  );
-}
-
-let cachedTransport: any = null;
-
-function getSmtpTransport() {
-  if (cachedTransport) return cachedTransport;
-  cachedTransport = nodemailer.createTransport({
-    pool: true, // Использовать пул соединений
-    maxConnections: 5,
-    maxMessages: 100,
-    rateDelta: 1000,
-    rateLimit: 5,
-    host: Deno.env.get('SMTP_HOSTNAME')!,
-    port: Number(Deno.env.get('SMTP_PORT')),
-    secure: Deno.env.get('SMTP_SECURE') === 'true',
-    auth: {
-      user: Deno.env.get('SMTP_USERNAME')!,
-      pass: Deno.env.get('SMTP_PASSWORD')!,
-    },
-  });
-  return cachedTransport;
+  return false;
 }
 
 async function sendViaSmtp(to: string, code: string): Promise<boolean> {
-  if (!smtpConfigured()) return false;
-
-  const transport = getSmtpTransport();
-
-  await new Promise<void>((resolve, reject) => {
-    transport.sendMail(
-      {
-        from: Deno.env.get('SMTP_FROM')!,
-        to,
-        subject: VERIFICATION_SUBJECT,
-        html: verificationEmailHtml(code),
-      },
-      (error) => {
-        if (error) reject(error);
-        else resolve();
-      }
-    );
-  });
-  return true;
+  return false;
 }
 
-/** Порядок: Resend → Brevo API → SMTP (учётные данные можно взять из Auth → SMTP в Dashboard). */
 async function sendVerificationEmail(to: string, code: string): Promise<boolean> {
   const hasResend = Boolean(Deno.env.get('RESEND_API_KEY'));
   const hasBrevo = Boolean(Deno.env.get('BREVO_API_KEY'));
