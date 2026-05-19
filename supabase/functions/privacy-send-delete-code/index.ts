@@ -1,5 +1,4 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
-import nodemailer from 'npm:nodemailer@6.9.10';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -107,48 +106,43 @@ async function sendViaBrevo(to: string, code: string): Promise<boolean> {
 }
 
 function smtpConfigured(): boolean {
-  return Boolean(
-    Deno.env.get('SMTP_HOSTNAME') &&
-    Deno.env.get('SMTP_PORT') &&
-    Deno.env.get('SMTP_USERNAME') &&
-    Deno.env.get('SMTP_PASSWORD') &&
-    Deno.env.get('SMTP_FROM')
-  );
+  return Boolean(Deno.env.get('GMAIL_SCRIPT_URL'));
 }
 
 async function sendViaSmtp(to: string, code: string): Promise<boolean> {
-  if (!smtpConfigured()) return false;
+  const scriptUrl = Deno.env.get('GMAIL_SCRIPT_URL');
+  if (!scriptUrl) return false;
 
-  const transport = nodemailer.createTransport({
-    host: Deno.env.get('SMTP_HOSTNAME')!,
-    port: Number(Deno.env.get('SMTP_PORT')),
-    secure: Deno.env.get('SMTP_SECURE') === 'true',
-    auth: {
-      user: Deno.env.get('SMTP_USERNAME')!,
-      pass: Deno.env.get('SMTP_PASSWORD')!,
-    },
-    // Тайм-аут подключения 10 секунд для предотвращения зависаний
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 10000,
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-  await new Promise<void>((resolve, reject) => {
-    transport.sendMail(
-      {
-        from: Deno.env.get('SMTP_FROM')!,
+  try {
+    const res = await fetch(scriptUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         to,
         subject: DELETE_EMAIL_SUBJECT,
         html: deleteEmailHtml(code),
-      },
-      (error: Error | null) => {
-        transport.close();
-        if (error) reject(error);
-        else resolve();
-      }
-    );
-  });
-  return true;
+      }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error('[privacy-send-delete-code] Gmail Script error:', res.status, errText);
+      throw new Error('gmail_script_failed');
+    }
+
+    const data = await res.json();
+    return Boolean(data && data.ok);
+  } catch (err) {
+    clearTimeout(timeoutId);
+    console.error('[privacy-send-delete-code] Gmail Script fetch failed:', err);
+    throw err;
+  }
 }
 
 async function sendDeleteCode(to: string, code: string): Promise<boolean> {
