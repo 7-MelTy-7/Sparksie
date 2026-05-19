@@ -38,7 +38,8 @@ Deno.serve(async (req) => {
   });
 
   const token = authHeader.replace('Bearer ', '');
-  const { data: { user }, error: authError } = await admin.auth.getUser(token);
+  const { data, error: authError } = await admin.auth.getUser(token);
+  const user = data?.user;
 
   if (authError || !user || !user.email) {
     return json({ error: 'Invalid token or missing email' }, 401);
