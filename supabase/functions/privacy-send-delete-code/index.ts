@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
+import nodemailer from 'npm:nodemailer@6.9.10';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -93,8 +94,6 @@ function smtpConfigured(): boolean {
 async function sendViaSmtp(to: string, code: string): Promise<boolean> {
   if (!smtpConfigured()) return false;
 
-  // Use nodemailer via npm specifier (same as register-send-code)
-  const nodemailer = (await import('npm:nodemailer@6.9.10')).default;
   const transport = nodemailer.createTransport({
     host: Deno.env.get('SMTP_HOSTNAME')!,
     port: Number(Deno.env.get('SMTP_PORT')),
