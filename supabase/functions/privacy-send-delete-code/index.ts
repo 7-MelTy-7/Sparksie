@@ -39,17 +39,30 @@ async function sendViaResend(to: string, code: string): Promise<boolean> {
   if (!apiKey) return false;
 
   const from = Deno.env.get('RESEND_FROM_EMAIL') || 'SPARK <onboarding@resend.dev>';
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from, to: [to], subject: DELETE_EMAIL_SUBJECT, html: deleteEmailHtml(code) }),
-  });
-  if (!res.ok) {
-    const err = await res.text();
-    console.error('[privacy-send-delete-code] Resend error', res.status, err);
-    throw new Error('email_delivery_failed');
+  
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from, to: [to], subject: DELETE_EMAIL_SUBJECT, html: deleteEmailHtml(code) }),
+      signal: controller.signal,
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (!res.ok) {
+      const err = await res.text();
+      console.error('[privacy-send-delete-code] Resend error', res.status, err);
+      throw new Error('email_delivery_failed');
+    }
+    return true;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
   }
-  return true;
 }
 
 async function sendViaBrevo(to: string, code: string): Promise<boolean> {
@@ -63,22 +76,34 @@ async function sendViaBrevo(to: string, code: string): Promise<boolean> {
     'SPARK <noreply@example.com>';
   const from = parseFromAddress(fromRaw);
 
-  const res = await fetch('https://api.brevo.com/v3/smtp/email', {
-    method: 'POST',
-    headers: { 'api-key': apiKey, 'Content-Type': 'application/json', accept: 'application/json' },
-    body: JSON.stringify({
-      sender: { name: from.name, email: from.email },
-      to: [{ email: to }],
-      subject: DELETE_EMAIL_SUBJECT,
-      htmlContent: deleteEmailHtml(code),
-    }),
-  });
-  if (!res.ok) {
-    const err = await res.text();
-    console.error('[privacy-send-delete-code] Brevo error', res.status, err);
-    throw new Error('email_delivery_failed');
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+  try {
+    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: { 'api-key': apiKey, 'Content-Type': 'application/json', accept: 'application/json' },
+      body: JSON.stringify({
+        sender: { name: from.name, email: from.email },
+        to: [{ email: to }],
+        subject: DELETE_EMAIL_SUBJECT,
+        htmlContent: deleteEmailHtml(code),
+      }),
+      signal: controller.signal,
+    });
+    
+    clearTimeout(timeoutId);
+
+    if (!res.ok) {
+      const err = await res.text();
+      console.error('[privacy-send-delete-code] Brevo error', res.status, err);
+      throw new Error('email_delivery_failed');
+    }
+    return true;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
   }
-  return true;
 }
 
 function smtpConfigured(): boolean {
@@ -102,21 +127,34 @@ async function sendViaSmtp(to: string, code: string): Promise<boolean> {
       user: Deno.env.get('SMTP_USERNAME')!,
       pass: Deno.env.get('SMTP_PASSWORD')!,
     },
+    // Тайм-аут подключения 10 секунд для предотвращения зависаний
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
   });
 
   await new Promise<void>((resolve, reject) => {
     transport.sendMail(
-      { from: Deno.env.get('SMTP_FROM')!, to, subject: DELETE_EMAIL_SUBJECT, html: deleteEmailHtml(code) },
-      (error: Error | null) => { if (error) reject(error); else resolve(); }
+      {
+        from: Deno.env.get('SMTP_FROM')!,
+        to,
+        subject: DELETE_EMAIL_SUBJECT,
+        html: deleteEmailHtml(code),
+      },
+      (error: Error | null) => {
+        transport.close();
+        if (error) reject(error);
+        else resolve();
+      }
     );
   });
   return true;
 }
 
 async function sendDeleteCode(to: string, code: string): Promise<boolean> {
+  const hasSmtp = smtpConfigured();
   const hasResend = Boolean(Deno.env.get('RESEND_API_KEY'));
   const hasBrevo = Boolean(Deno.env.get('BREVO_API_KEY'));
-  const hasSmtp = smtpConfigured();
 
   if (!hasResend && !hasBrevo && !hasSmtp) {
     console.warn('[privacy-send-delete-code] no email provider configured');
@@ -125,14 +163,27 @@ async function sendDeleteCode(to: string, code: string): Promise<boolean> {
 
   let lastError: unknown = null;
 
+  if (hasSmtp) {
+    try {
+      if (await sendViaSmtp(to, code)) return true;
+    } catch (e) {
+      lastError = e;
+      console.error('[privacy-send-delete-code] SMTP failed', e);
+    }
+  }
   if (hasResend) {
-    try { if (await sendViaResend(to, code)) return true; } catch (e) { lastError = e; }
+    try {
+      if (await sendViaResend(to, code)) return true;
+    } catch (e) {
+      lastError = e;
+    }
   }
   if (hasBrevo) {
-    try { if (await sendViaBrevo(to, code)) return true; } catch (e) { lastError = e; }
-  }
-  if (hasSmtp) {
-    try { if (await sendViaSmtp(to, code)) return true; } catch (e) { lastError = e; }
+    try {
+      if (await sendViaBrevo(to, code)) return true;
+    } catch (e) {
+      lastError = e;
+    }
   }
 
   if (lastError) throw lastError;

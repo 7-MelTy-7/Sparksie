@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
+import nodemailer from 'npm:nodemailer@6.9.10';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -174,17 +175,53 @@ async function sendViaBrevo(to: string, code: string): Promise<boolean> {
 }
 
 function smtpConfigured(): boolean {
-  return false;
+  return Boolean(
+    Deno.env.get('SMTP_HOSTNAME') &&
+    Deno.env.get('SMTP_PORT') &&
+    Deno.env.get('SMTP_USERNAME') &&
+    Deno.env.get('SMTP_PASSWORD') &&
+    Deno.env.get('SMTP_FROM')
+  );
 }
 
 async function sendViaSmtp(to: string, code: string): Promise<boolean> {
-  return false;
+  if (!smtpConfigured()) return false;
+
+  const transport = nodemailer.createTransport({
+    host: Deno.env.get('SMTP_HOSTNAME')!,
+    port: Number(Deno.env.get('SMTP_PORT')),
+    secure: Deno.env.get('SMTP_SECURE') === 'true',
+    auth: {
+      user: Deno.env.get('SMTP_USERNAME')!,
+      pass: Deno.env.get('SMTP_PASSWORD')!,
+    },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
+  });
+
+  await new Promise<void>((resolve, reject) => {
+    transport.sendMail(
+      {
+        from: Deno.env.get('SMTP_FROM')!,
+        to,
+        subject: VERIFICATION_SUBJECT,
+        html: verificationEmailHtml(code),
+      },
+      (error) => {
+        transport.close();
+        if (error) reject(error);
+        else resolve();
+      }
+    );
+  });
+  return true;
 }
 
 async function sendVerificationEmail(to: string, code: string): Promise<boolean> {
+  const hasSmtp = smtpConfigured();
   const hasResend = Boolean(Deno.env.get('RESEND_API_KEY'));
   const hasBrevo = Boolean(Deno.env.get('BREVO_API_KEY'));
-  const hasSmtp = smtpConfigured();
 
   if (!hasResend && !hasBrevo && !hasSmtp) {
     console.log('[register-send-code] no email provider configured');
@@ -193,6 +230,14 @@ async function sendVerificationEmail(to: string, code: string): Promise<boolean>
 
   let lastError: unknown = null;
 
+  if (hasSmtp) {
+    try {
+      if (await sendViaSmtp(to, code)) return true;
+    } catch (e) {
+      lastError = e;
+      console.error('[register-send-code] SMTP failed', e);
+    }
+  }
   if (hasResend) {
     try {
       if (await sendViaResend(to, code)) return true;
@@ -207,14 +252,6 @@ async function sendVerificationEmail(to: string, code: string): Promise<boolean>
     } catch (e) {
       lastError = e;
       console.error('[register-send-code] Brevo failed', e);
-    }
-  }
-  if (hasSmtp) {
-    try {
-      if (await sendViaSmtp(to, code)) return true;
-    } catch (e) {
-      lastError = e;
-      console.error('[register-send-code] SMTP failed', e);
     }
   }
 
